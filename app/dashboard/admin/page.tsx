@@ -88,8 +88,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tổng Quan Hệ Thống</h1>
-          <p className="text-gray-500 mt-1">Quản lý toàn bộ nền tảng HomeManager.</p>
+          <h1 className="text-3xl font-bold text-foreground">Tổng Quan Hệ Thống</h1>
+          <p className="text-muted-foreground mt-1">Quản lý toàn bộ nền tảng HomeManager.</p>
         </div>
       </header>
 
@@ -104,19 +104,19 @@ export default function AdminDashboard() {
             </p>
             <p className="text-sm text-gray-400 mt-1">+5 tuần này</p>
           </div>
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg flex-shrink-0">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0">
             <Users className="w-6 h-6" />
           </div>
         </div>
 
         {/* Card 2 - Total Tenants */}
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Tổng số Khách thuê</h3>
+            <h3 className="font-medium text-muted-foreground">Tổng số Khách thuê</h3>
             <p className="text-3xl font-bold mt-2 text-green-600">
               {kpiData.totalTenants}
             </p>
-            <p className="text-sm text-gray-400 mt-1">+18 tuần này</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">+18 tuần này</p>
           </div>
           <div className="p-3 bg-green-50 text-green-600 rounded-lg flex-shrink-0">
             <Users className="w-6 h-6" />
@@ -124,13 +124,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card 3 - Total Properties */}
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Tổng số Khu trọ</h3>
+            <h3 className="font-medium text-muted-foreground">Tổng số Khu trọ</h3>
             <p className="text-3xl font-bold mt-2 text-purple-600">
               {kpiData.totalProperties}
             </p>
-            <p className="text-sm text-gray-400 mt-1">+3 tuần này</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">+3 tuần này</p>
           </div>
           <div className="p-3 bg-purple-50 text-purple-600 rounded-lg flex-shrink-0">
             <Building className="w-6 h-6" />
@@ -138,13 +138,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card 4 - Platform Revenue */}
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Doanh thu tháng này</h3>
+            <h3 className="font-medium text-muted-foreground">Doanh thu tháng này</h3>
             <p className="text-2xl font-bold mt-2 text-amber-600">
               {kpiData.platformRevenue.toLocaleString("vi-VN")} đ
             </p>
-            <p className="text-sm text-gray-400 mt-1">Tính toán từ hoa hồng</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">Tính toán từ hoa hồng</p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-lg flex-shrink-0">
             <TrendingUp className="w-6 h-6" />
@@ -153,9 +153,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Landlords Management Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="font-bold text-lg text-gray-900">Quản lý Chủ trọ</h3>
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-lg text-foreground">Quản lý Chủ trọ</h3>
           <Link
             href="/dashboard/admin/landlords"
             className="text-sm text-blue-600 font-medium hover:underline"
@@ -165,13 +165,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="p-6 border-b border-gray-100 flex gap-4">
+        <div className="p-6 border-b border-border flex gap-4">
           <button
             onClick={() => setLandlordFilter("pending")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               landlordFilter === "pending"
                 ? "bg-yellow-100 text-yellow-700"
-                : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                : "bg-muted text-card-foreground hover:bg-muted/80"
             }`}
           >
             <AlertCircle className="w-4 h-4 inline mr-2" />
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               landlordFilter === "active"
                 ? "bg-green-100 text-green-700"
-                : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                : "bg-muted text-card-foreground hover:bg-muted/80"
             }`}
           >
             <CheckCircle className="w-4 h-4 inline mr-2" />
@@ -194,54 +194,54 @@ export default function AdminDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+              <tr className="border-b border-border bg-muted/50">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                   Tên Chủ trọ
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                   Email
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                   Số điện thoại
                 </th>
                 {landlordFilter === "pending" && (
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                     Ngày đăng ký
                   </th>
                 )}
                 {landlordFilter === "active" && (
                   <>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                       Khu trọ
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                       Khách thuê
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                       Doanh thu
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                   Hành động
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {displayLandlords.length > 0 ? (
                 displayLandlords.map((landlord) => (
-                  <tr key={landlord.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={landlord.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">{landlord.name}</p>
+                      <p className="font-medium text-foreground">{landlord.name}</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">
+                    <td className="px-6 py-4 text-muted-foreground text-sm">
                       {landlord.email}
                     </td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">
+                    <td className="px-6 py-4 text-muted-foreground text-sm">
                       {landlord.phone}
                     </td>
                     {landlordFilter === "pending" && (
-                      <td className="px-6 py-4 text-gray-600 text-sm">
+                      <td className="px-6 py-4 text-muted-foreground text-sm">
                         {landlord.createdDate}
                       </td>
                     )}
@@ -257,13 +257,13 @@ export default function AdminDashboard() {
                             {landlord.tenants}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-medium text-gray-900">
+                        <td className="px-6 py-4 font-medium text-foreground">
                           {landlord.monthlyRevenue.toLocaleString("vi-VN")} đ
                         </td>
                       </>
                     )}
                     <td className="px-6 py-4">
-                      <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                      <button className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors">
                         <MoreHorizontal className="w-5 h-5" />
                       </button>
                     </td>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                     colSpan={landlordFilter === "pending" ? 5 : 8}
                     className="px-6 py-12 text-center"
                   >
-                    <p className="text-gray-500 font-medium">Không có dữ liệu</p>
+                    <p className="text-muted-foreground font-medium">Không có dữ liệu</p>
                   </td>
                 </tr>
               )}

@@ -37,7 +37,7 @@ export default function PropertiesPage() {
     const result = await getProperties();
 
     if (!result.success) {
-      setError(result.error ?? "Khong the tai danh sach khu tro");
+      setError(result.error ?? "Không thể tải danh sách khu trọ");
       setLoading(false);
       return;
     }
@@ -58,7 +58,7 @@ export default function PropertiesPage() {
       }
 
       if (!result.success) {
-        setError(result.error ?? "Khong the tai danh sach khu tro");
+        setError(result.error ?? "Không thể tải danh sách khu trọ");
         setLoading(false);
         return;
       }
@@ -87,14 +87,14 @@ export default function PropertiesPage() {
     });
 
     if (!result.success) {
-      setError(result.error ?? "Khong the tao khu tro");
+      setError(result.error ?? "Không thể tạo khu trọ");
       setCreatingProperty(false);
       return;
     }
 
     setPropertyForm({ name: "", address: "", description: "" });
     setShowCreateProperty(false);
-    setActionMessage("Tao khu tro thanh cong");
+    setActionMessage("Tạo khu trọ thành công");
     setCreatingProperty(false);
     await loadProperties();
   };
@@ -115,14 +115,14 @@ export default function PropertiesPage() {
     });
 
     if (!result.success) {
-      setError(result.error ?? "Khong the tao phong");
+      setError(result.error ?? "Không thể tạo phòng");
       setCreatingRoom(false);
       return;
     }
 
     setRoomForm({ name: "", price: "", capacity: "", area: "" });
     setActiveRoomFormFor(null);
-    setActionMessage("Them phong thanh cong");
+    setActionMessage("Thêm phòng thành công");
     setCreatingRoom(false);
     await loadProperties();
   };
@@ -142,10 +142,10 @@ export default function PropertiesPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Khu Tro & Phong</h1>
-          <p className="text-gray-500 text-sm mt-1">Quan ly cac toa nha va trang thai phong cua ban.</p>
-          <p className="text-xs text-gray-400 mt-2">
-            Tong phong: {totals.roomCount} | Da thue: {totals.rentedCount}
+          <h1 className="text-2xl font-bold text-foreground">Khu Trọ & Phòng</h1>
+          <p className="text-muted-foreground text-sm mt-1">Quản lý các tòa nhà và trạng thái phòng của bạn.</p>
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Tổng phòng: {totals.roomCount} | Đã thuê: {totals.rentedCount}
           </p>
         </div>
         <button
@@ -157,22 +157,22 @@ export default function PropertiesPage() {
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Them Khu Tro
+          Thêm Khu Trọ
         </button>
       </header>
 
       {showCreateProperty && (
         <form
           onSubmit={handleCreateProperty}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 grid grid-cols-1 md:grid-cols-3 gap-3"
+          className="bg-card rounded-2xl shadow-sm border border-border p-4 grid grid-cols-1 md:grid-cols-3 gap-3"
         >
           <input
             value={propertyForm.name}
             onChange={(event) =>
               setPropertyForm((prev) => ({ ...prev, name: event.target.value }))
             }
-            placeholder="Ten khu tro"
-            className="px-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Tên khu trọ"
+            className="px-3 py-2 border border-input rounded-lg bg-background text-foreground"
             required
           />
           <input
@@ -180,8 +180,8 @@ export default function PropertiesPage() {
             onChange={(event) =>
               setPropertyForm((prev) => ({ ...prev, address: event.target.value }))
             }
-            placeholder="Dia chi"
-            className="px-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Địa chỉ"
+            className="px-3 py-2 border border-input rounded-lg bg-background text-foreground"
             required
           />
           <div className="flex gap-2">
@@ -193,41 +193,41 @@ export default function PropertiesPage() {
                   description: event.target.value,
                 }))
               }
-              placeholder="Mo ta (tuy chon)"
-              className="px-3 py-2 border border-gray-300 rounded-lg flex-1"
+              placeholder="Mô tả (tùy chọn)"
+              className="px-3 py-2 border border-input rounded-lg flex-1 bg-background text-foreground"
             />
             <button
               disabled={creatingProperty}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60"
             >
-              {creatingProperty ? "Dang tao..." : "Luu"}
+              {creatingProperty ? "Đang tạo..." : "Lưu"}
             </button>
           </div>
         </form>
       )}
 
-      {loading && <p className="text-sm text-gray-500">Dang tai du lieu...</p>}
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
       {actionMessage && <p className="text-sm text-green-600">{actionMessage}</p>}
 
       {!loading && !error && properties.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <p className="text-sm text-gray-500">Chua co khu tro nao.</p>
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <p className="text-sm text-muted-foreground">Chưa có khu trọ nào.</p>
         </div>
       )}
 
       <div className="space-y-6">
         {properties.map((property) => (
-          <div key={property.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between gap-4">
+          <div key={property.id} className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="p-6 border-b border-border bg-muted/30 flex flex-col sm:flex-row justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-gray-900">{property.name}</h2>
+                  <h2 className="text-xl font-bold text-foreground">{property.name}</h2>
                   <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-md">
-                    Hoat dong
+                    Hoạt động
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-500 text-sm mt-2">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mt-2">
                   <MapPin className="w-4 h-4" />
                   {property.address}
                 </div>
@@ -241,9 +241,9 @@ export default function PropertiesPage() {
                     setError(null);
                     setActionMessage(null);
                   }}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-3 py-1.5 text-sm font-medium text-card-foreground bg-background border border-border rounded-lg hover:bg-muted"
                 >
-                  Them phong
+                  Thêm phòng
                 </button>
               </div>
             </div>
@@ -251,15 +251,15 @@ export default function PropertiesPage() {
             {activeRoomFormFor === property.id && (
               <form
                 onSubmit={(event) => handleCreateRoom(event, property.id)}
-                className="p-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-3"
+                className="p-4 border-b border-border grid grid-cols-1 md:grid-cols-4 gap-3"
               >
                 <input
                   value={roomForm.name}
                   onChange={(event) =>
                     setRoomForm((prev) => ({ ...prev, name: event.target.value }))
                   }
-                  placeholder="Ten phong"
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Tên phòng"
+                  className="px-3 py-2 border border-input rounded-lg bg-background text-foreground"
                   required
                 />
                 <input
@@ -269,8 +269,8 @@ export default function PropertiesPage() {
                   onChange={(event) =>
                     setRoomForm((prev) => ({ ...prev, price: event.target.value }))
                   }
-                  placeholder="Gia thue"
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Giá thuê"
+                  className="px-3 py-2 border border-input rounded-lg bg-background text-foreground"
                   required
                 />
                 <input
@@ -280,8 +280,8 @@ export default function PropertiesPage() {
                   onChange={(event) =>
                     setRoomForm((prev) => ({ ...prev, capacity: event.target.value }))
                   }
-                  placeholder="Suc chua"
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Sức chứa"
+                  className="px-3 py-2 border border-input rounded-lg bg-background text-foreground"
                   required
                 />
                 <div className="flex gap-2">
@@ -292,14 +292,14 @@ export default function PropertiesPage() {
                     onChange={(event) =>
                       setRoomForm((prev) => ({ ...prev, area: event.target.value }))
                     }
-                    placeholder="Dien tich"
-                    className="px-3 py-2 border border-gray-300 rounded-lg flex-1"
+                    placeholder="Diện tích"
+                    className="px-3 py-2 border border-input rounded-lg flex-1 bg-background text-foreground"
                   />
                   <button
                     disabled={creatingRoom}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60"
                   >
-                    {creatingRoom ? "Dang tao..." : "Luu"}
+                    {creatingRoom ? "Đang tạo..." : "Lưu"}
                   </button>
                 </div>
               </form>
@@ -308,17 +308,17 @@ export default function PropertiesPage() {
             <div className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {property.rooms.length === 0 && (
-                  <div className="p-4 rounded-xl border border-dashed border-gray-300 bg-gray-50/50">
-                    <p className="text-sm text-gray-500">Khu tro chua co phong nao.</p>
+                  <div className="p-4 rounded-xl border border-dashed border-border bg-muted/30">
+                    <p className="text-sm text-muted-foreground">Khu trọ chưa có phòng nào.</p>
                   </div>
                 )}
 
                 {property.rooms.map((room) => (
-                  <div key={room.id} className="p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-colors">
+                  <div key={room.id} className="p-4 rounded-xl border border-border hover:border-blue-300 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-2">
-                        <DoorOpen className="w-5 h-5 text-gray-400" />
-                        <span className="font-bold text-gray-900">{room.name}</span>
+                        <DoorOpen className="w-5 h-5 text-muted-foreground" />
+                        <span className="font-bold text-foreground">{room.name}</span>
                       </div>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded ${
@@ -330,20 +330,20 @@ export default function PropertiesPage() {
                         }`}
                       >
                         {room.status === "RENTED"
-                          ? "Da thue"
+                          ? "Đã thuê"
                           : room.status === "AVAILABLE"
-                            ? "Phong trong"
-                            : "Bao tri"}
+                            ? "Phòng trống"
+                            : "Bảo trì"}
                       </span>
                     </div>
-                    <div className="space-y-1 mb-4 text-sm text-gray-600">
+                    <div className="space-y-1 mb-4 text-sm text-muted-foreground">
                       <p className="flex justify-between">
-                        <span>Gia thue:</span>
-                        <span className="font-medium text-gray-900">{currency.format(room.price)} đ</span>
+                        <span>Giá thuê:</span>
+                        <span className="font-medium text-foreground">{currency.format(room.price)} đ</span>
                       </p>
                       <p className="flex justify-between">
-                        <span>Suc chua:</span>
-                        <span>{room.capacity} nguoi</span>
+                        <span>Sức chứa:</span>
+                        <span>{room.capacity} người</span>
                       </p>
                     </div>
                   </div>

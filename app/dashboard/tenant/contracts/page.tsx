@@ -25,8 +25,8 @@ export default function TenantContracts() {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Hợp đồng của tôi</h1>
-          <p className="text-gray-500 mt-1">Xem thông tin và tải về hợp đồng thuê phòng.</p>
+          <h1 className="text-3xl font-bold text-foreground">Hợp đồng của tôi</h1>
+          <p className="text-muted-foreground mt-1">Xem thông tin và tải về hợp đồng thuê phòng.</p>
         </div>
       </header>
 
@@ -35,18 +35,18 @@ export default function TenantContracts() {
         {contracts.map((contract) => (
           <div
             key={contract.id}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+            className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden"
           >
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-6 border-b border-border">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-blue-50 text-blue-600 rounded-lg flex-shrink-0">
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{contract.roomName}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{contract.property}</p>
-                    <p className="text-sm text-gray-500">Mã hợp đồng: {contract.id}</p>
+                    <h3 className="text-xl font-bold text-foreground">{contract.roomName}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{contract.property}</p>
+                    <p className="text-sm text-muted-foreground">Mã hợp đồng: {contract.id}</p>
                   </div>
                 </div>
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 flex-shrink-0">
@@ -58,38 +58,38 @@ export default function TenantContracts() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500">Chủ trọ</p>
-                  <p className="font-medium text-gray-900 mt-2">{contract.landlord}</p>
+                  <p className="text-sm text-muted-foreground">Chủ trọ</p>
+                  <p className="font-medium text-foreground mt-2">{contract.landlord}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Thời hạn</p>
-                  <p className="font-medium text-gray-900 mt-2">
+                  <p className="text-sm text-muted-foreground">Thời hạn</p>
+                  <p className="font-medium text-foreground mt-2">
                     {contract.startDate} đến {contract.endDate}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Thời gian còn lại</p>
-                  <p className="font-medium text-gray-900 mt-2">3 tháng 25 ngày</p>
+                  <p className="text-sm text-muted-foreground">Thời gian còn lại</p>
+                  <p className="font-medium text-foreground mt-2">3 tháng 25 ngày</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Giá thuê hàng tháng</p>
-                  <p className="font-medium text-gray-900 mt-2">
+                  <p className="text-sm text-muted-foreground">Giá thuê hàng tháng</p>
+                  <p className="font-medium text-foreground mt-2">
                     {contract.roomPrice.toLocaleString("vi-VN")} đ
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Tiền cọc</p>
-                  <p className="font-medium text-gray-900 mt-2">
+                  <p className="text-sm text-muted-foreground">Tiền cọc</p>
+                  <p className="font-medium text-foreground mt-2">
                     {contract.deposit.toLocaleString("vi-VN")} đ
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Điều khoản chính</p>
-                  <p className="font-medium text-gray-900 mt-2 text-sm">{contract.terms}</p>
+                  <p className="text-sm text-muted-foreground">Điều khoản chính</p>
+                  <p className="font-medium text-foreground mt-2 text-sm">{contract.terms}</p>
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-gray-200">
+              <div className="pt-6 border-t border-border">
                 <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
                   <Download className="w-5 h-5" />
                   Tải hợp đồng PDF

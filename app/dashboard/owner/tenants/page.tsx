@@ -61,7 +61,7 @@ export default function TenantsPage() {
     const result = await getTenants();
 
     if (!result.success) {
-      setError(result.error ?? "Khong the tai danh sach khach thue");
+      setError(result.error ?? "Không thể tải danh sách khách thuê");
       setLoading(false);
       return;
     }
@@ -83,7 +83,7 @@ export default function TenantsPage() {
       }
 
       if (!contractsRes.success) {
-        setError(contractsRes.error ?? "Khong the tai danh sach khach thue");
+        setError(contractsRes.error ?? "Không thể tải danh sách khách thuê");
         setLoading(false);
         return;
       }
@@ -109,7 +109,7 @@ export default function TenantsPage() {
 
     const depositNum = Number(formData.deposit);
     if (Number.isNaN(depositNum) || depositNum < 0) {
-      setError("Tien dam bao phai la so lon hon 0");
+      setError("Tiền đặt cọc phải là số lớn hơn 0");
       setCreatingContract(false);
       return;
     }
@@ -126,7 +126,7 @@ export default function TenantsPage() {
     });
 
     if (!result.success) {
-      setError(result.error ?? "Khong the tao hop dong");
+      setError(result.error ?? "Không thể tạo hợp đồng");
       setCreatingContract(false);
       return;
     }
@@ -142,7 +142,7 @@ export default function TenantsPage() {
       deposit: "",
     });
     setShowCreateForm(false);
-    setMessage("Tao hop dong thanh cong");
+    setMessage("Tạo hợp đồng thành công");
     setCreatingContract(false);
     await loadContracts();
   };
@@ -169,8 +169,8 @@ export default function TenantsPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Khach Thue</h1>
-          <p className="text-gray-500 text-sm mt-1">Quan ly thong tin khach thue va hop dong hien tai.</p>
+          <h1 className="text-2xl font-bold text-foreground">Khách Thuê</h1>
+          <p className="text-muted-foreground text-sm mt-1">Quản lý thông tin khách thuê và hợp đồng hiện tại.</p>
         </div>
         <button
           onClick={() => {
@@ -181,21 +181,21 @@ export default function TenantsPage() {
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
-          {showCreateForm ? "Dong" : "+ Them hop dong"}
+          {showCreateForm ? "Đóng" : "Thêm hợp đồng"}
         </button>
       </header>
 
       {showCreateForm && (
         <form
           onSubmit={handleCreateContract}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+          className="bg-card rounded-2xl shadow-sm border border-border p-6 space-y-4"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-lg text-gray-900">Them Hop Dong Moi</h3>
+            <h3 className="font-semibold text-lg text-foreground">Thêm Hợp Đồng Mới</h3>
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
@@ -203,8 +203,8 @@ export default function TenantsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phong <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Phòng <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.roomId}
@@ -212,15 +212,15 @@ export default function TenantsPage() {
                   setFormData((prev) => ({ ...prev, roomId: event.target.value }))
                 }
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               >
-                <option value="">-- Chon phong --</option>
+                <option value="">-- Chọn phòng --</option>
                 {availableRooms.length === 0 ? (
-                  <option disabled>Khong co phong trong</option>
+                  <option disabled>Không có phòng trống</option>
                 ) : (
                   availableRooms.map((room) => (
                     <option key={room.id} value={room.id}>
-                      {room.propertyName} - {room.name} ({room.price} d/thang)
+                      {room.propertyName} - {room.name} ({room.price} đ/tháng)
                     </option>
                   ))
                 )}
@@ -228,8 +228,8 @@ export default function TenantsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ten Khach <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Tên Khách <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -237,15 +237,15 @@ export default function TenantsPage() {
                 onChange={(event) =>
                   setFormData((prev) => ({ ...prev, tenantName: event.target.value }))
                 }
-                placeholder="Ho va ten"
+                placeholder="Họ và tên"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Khach <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Email Khách <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -255,13 +255,13 @@ export default function TenantsPage() {
                 }
                 placeholder="khach@example.com"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                So Dien Thoai
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Số Điện Thoại
               </label>
               <input
                 type="text"
@@ -270,13 +270,13 @@ export default function TenantsPage() {
                   setFormData((prev) => ({ ...prev, tenantPhone: event.target.value }))
                 }
                 placeholder="0123456789"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                So CCCD
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Số CCCD
               </label>
               <input
                 type="text"
@@ -285,13 +285,13 @@ export default function TenantsPage() {
                   setFormData((prev) => ({ ...prev, tenantCccd: event.target.value }))
                 }
                 placeholder="123456789"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tien Dam Bao <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Tiền Đặt Cọc <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -302,13 +302,13 @@ export default function TenantsPage() {
                 }
                 placeholder="0"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngay Bat Dau <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Ngày Bắt Đầu <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -317,13 +317,13 @@ export default function TenantsPage() {
                   setFormData((prev) => ({ ...prev, startDate: event.target.value }))
                 }
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngay Ket Thuc (Tuy Chon)
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Ngày Kết Thúc (Tùy Chọn)
               </label>
               <input
                 type="date"
@@ -331,7 +331,7 @@ export default function TenantsPage() {
                 onChange={(event) =>
                   setFormData((prev) => ({ ...prev, endDate: event.target.value }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-background text-foreground"
               />
             </div>
           </div>
@@ -340,64 +340,64 @@ export default function TenantsPage() {
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+              className="px-4 py-2 text-foreground bg-muted rounded-lg hover:bg-muted/80 font-medium"
             >
-              Huy
+              Hủy
             </button>
             <button
               type="submit"
               disabled={creatingContract || availableRooms.length === 0}
               className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium"
             >
-              {creatingContract ? "Dang tao..." : "Tao Hop Dong"}
+              {creatingContract ? "Đang tạo..." : "Tạo Hợp Đồng"}
             </button>
           </div>
         </form>
       )}
 
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Tim theo ten, SDT, so phong..."
-          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+          placeholder="Tìm theo tên, SĐT, số phòng..."
+          className="w-full pl-9 pr-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none bg-background text-foreground"
         />
       </div>
 
-      {loading && <p className="text-sm text-gray-500">Dang tai du lieu...</p>}
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-green-600">{message}</p>}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto">
-        <table className="w-full text-left text-sm text-gray-600">
-          <thead className="bg-gray-50/80 border-b border-gray-100 text-gray-500 uppercase">
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden overflow-x-auto">
+        <table className="w-full text-left text-sm text-muted-foreground">
+          <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase">
             <tr>
-              <th className="px-6 py-4 font-medium">Khach Thue</th>
-              <th className="px-6 py-4 font-medium">Phong</th>
-              <th className="px-6 py-4 font-medium">Lien He</th>
-              <th className="px-6 py-4 font-medium">Ngay Vao O</th>
-              <th className="px-6 py-4 font-medium">Trang Thai</th>
+              <th className="px-6 py-4 font-medium">Khách Thuê</th>
+              <th className="px-6 py-4 font-medium">Phòng</th>
+              <th className="px-6 py-4 font-medium">Liên Hệ</th>
+              <th className="px-6 py-4 font-medium">Ngày Vào Ở</th>
+              <th className="px-6 py-4 font-medium">Trạng Thái</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {!loading && filtered.length === 0 && (
               <tr>
-                <td className="px-6 py-8 text-sm text-gray-500" colSpan={5}>
-                  Khong co du lieu khach thue.
+                <td className="px-6 py-8 text-sm text-muted-foreground" colSpan={5}>
+                  Không có dữ liệu khách thuê.
                 </td>
               </tr>
             )}
 
             {filtered.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+              <tr key={item.id} className="hover:bg-muted/50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="font-medium text-gray-900">{item.tenant.name}</div>
-                  <div className="text-xs text-gray-500">CCCD: {item.tenant.cccd ?? "--"}</div>
+                  <div className="font-medium text-foreground">{item.tenant.name}</div>
+                  <div className="text-xs text-muted-foreground">CCCD: {item.tenant.cccd ?? "--"}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium text-xs">
+                  <span className="inline-flex items-center px-2 py-1 rounded bg-muted text-card-foreground font-medium text-xs">
                     {item.room.name}
                   </span>
                 </td>
@@ -414,10 +414,10 @@ export default function TenantsPage() {
                     }`}
                   >
                     {item.status === "ACTIVE"
-                      ? "Dang Hieu Luc"
+                      ? "Đang Hiệu Lực"
                       : item.status === "EXPIRED"
-                        ? "Het Han"
-                        : "Da Thanh Ly"}
+                        ? "Hết Hạn"
+                        : "Đã Thanh Lý"}
                   </span>
                 </td>
               </tr>

@@ -50,23 +50,23 @@ export default function TenantDashboard() {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tổng Quan</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Tổng Quan</h1>
+          <p className="text-muted-foreground mt-1">
             Xem thông tin phòng và quản lý hóa đơn của bạn.
           </p>
         </div>
       </header>
 
       {/* Room Information Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+        <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
               <Home className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{roomInfo.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{roomInfo.property}</p>
+              <h2 className="text-xl font-bold text-foreground">{roomInfo.name}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{roomInfo.property}</p>
             </div>
           </div>
         </div>
@@ -74,22 +74,22 @@ export default function TenantDashboard() {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-gray-500">Địa chỉ</p>
-              <p className="font-medium text-gray-900 mt-1">{roomInfo.address}</p>
+              <p className="text-sm text-muted-foreground">Địa chỉ</p>
+              <p className="font-medium text-foreground mt-1">{roomInfo.address}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Diện tích</p>
-              <p className="font-medium text-gray-900 mt-1">{roomInfo.area}m²</p>
+              <p className="text-sm text-muted-foreground">Diện tích</p>
+              <p className="font-medium text-foreground mt-1">{roomInfo.area}m²</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Giá thuê hàng tháng</p>
-              <p className="font-medium text-gray-900 mt-1">
+              <p className="text-sm text-muted-foreground">Giá thuê hàng tháng</p>
+              <p className="font-medium text-foreground mt-1">
                 {roomInfo.price.toLocaleString("vi-VN")} đ
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Thời hạn hợp đồng</p>
-              <p className="font-medium text-gray-900 mt-1">
+              <p className="text-sm text-muted-foreground">Thời hạn hợp đồng</p>
+              <p className="font-medium text-foreground mt-1">
                 {roomInfo.contractStartDate} đến {roomInfo.contractEndDate}
               </p>
             </div>
@@ -101,7 +101,7 @@ export default function TenantDashboard() {
       {unpaidInvoices.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <AlertCircle className="w-6 h-6 text-red-600 mt-1" />
             </div>
             <div className="flex-1">
@@ -133,9 +133,9 @@ export default function TenantDashboard() {
 
       {/* Unpaid Invoices Summary */}
       {unpaidInvoices.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="font-bold text-lg text-gray-900">
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="p-6 border-b border-border">
+            <h3 className="font-bold text-lg text-foreground">
               Hóa đơn cần thanh toán
             </h3>
           </div>
@@ -144,18 +144,18 @@ export default function TenantDashboard() {
               {unpaidInvoices.map((invoice) => (
                 <div
                   key={invoice.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-gray-50 bg-gray-50/50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0">
                       {invoice.month}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-foreground">
                         Hóa đơn tháng {invoice.month}/{invoice.year}
                       </p>
-                      <p className="text-sm text-gray-500">
-                        Hạn chót: {invoice.dueDate}
+                      <p className="text-sm text-muted-foreground">
+                        Hạn chốt: {invoice.dueDate}
                       </p>
                       {invoice.status === "PARTIAL" && (
                         <p className="text-sm text-blue-600 font-medium">
@@ -164,8 +164,8 @@ export default function TenantDashboard() {
                       )}
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-gray-900">
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-foreground">
                       {invoice.totalAmount.toLocaleString("vi-VN")} đ
                     </p>
                     <span
@@ -190,29 +190,29 @@ export default function TenantDashboard() {
       {/* QR Code Modal */}
       {showQRCode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-foreground">
                 Mã QR thanh toán
               </h3>
               <button
                 onClick={() => setShowQRCode(false)}
-                className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="bg-gray-100 rounded-lg p-6 mb-6">
-              <div className="w-full aspect-square bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-full aspect-square bg-linear-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
                 <QrCode className="w-24 h-24 text-white" />
               </div>
             </div>
 
             <div className="space-y-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-xs text-gray-500">Tổng số tiền cần thanh toán</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+              <div className="bg-muted rounded-lg p-4">
+                <p className="text-xs text-muted-foreground">Tổng số tiền cần thanh toán</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {unpaidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0).toLocaleString("vi-VN")} đ
                 </p>
               </div>
@@ -225,7 +225,7 @@ export default function TenantDashboard() {
 
             <button
               onClick={() => setShowQRCode(false)}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+              className="w-full px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 font-medium transition-colors"
             >
               Đóng
             </button>

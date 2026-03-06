@@ -37,7 +37,7 @@ export default function OwnerDashboard() {
       ]);
 
       if (!propertiesRes.success || !tenantsRes.success || !invoicesRes.success) {
-        setError("Khong the tai du lieu tong quan");
+        setError("Không thể tải dữ liệu tổng quan");
         setLoading(false);
         return;
       }
@@ -107,45 +107,45 @@ export default function OwnerDashboard() {
     <div className="space-y-8 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tong Quan</h1>
-          <p className="text-gray-500 mt-1">Theo doi tinh hinh hoat dong cac khu tro cua ban.</p>
+          <h1 className="text-3xl font-bold text-foreground">Tổng Quan</h1>
+          <p className="text-muted-foreground mt-1">Theo dõi tình hình hoạt động các khu trọ của bạn.</p>
         </div>
         <div className="flex gap-3">
           <Link
             href="/dashboard/owner/invoices"
-            className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+            className="px-4 py-2 bg-card border border-border text-card-foreground rounded-lg hover:bg-muted font-medium transition-colors"
           >
-            Ghi dien nuoc
+            Ghi điện nước
           </Link>
           <Link
             href="/dashboard/owner/invoices"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors"
           >
-            + Tao hoa don moi
+            + Tạo hóa đơn mới
           </Link>
         </div>
       </header>
 
-      {loading && <p className="text-sm text-gray-500">Dang tai du lieu...</p>}
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Tong so phong</h3>
-            <p className="text-3xl font-bold mt-2 text-gray-900">{stats.totalRooms}</p>
+            <h3 className="font-medium text-muted-foreground">Tổng số phòng</h3>
+            <p className="text-3xl font-bold mt-2 text-foreground">{stats.totalRooms}</p>
           </div>
           <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
             <Building2 className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Ty le lap day</h3>
+            <h3 className="font-medium text-muted-foreground">Tỷ lệ lấp đầy</h3>
             <p className="text-3xl font-bold mt-2 text-green-600">{stats.occupancyRate}%</p>
-            <p className="text-sm text-gray-400 mt-1">
-              {stats.rentedRooms}/{stats.totalRooms} phong dang thue
+            <p className="text-sm text-muted-foreground/70 mt-1">
+              {stats.rentedRooms}/{stats.totalRooms} phòng đang thuê
             </p>
           </div>
           <div className="p-3 bg-green-50 text-green-600 rounded-lg">
@@ -153,34 +153,34 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Cho thu thang nay</h3>
+            <h3 className="font-medium text-muted-foreground">Chờ thu tháng này</h3>
             <p className="text-3xl font-bold mt-2 text-amber-500">{currency.format(stats.waitingAmount)}</p>
-            <p className="text-sm text-gray-400 mt-1">{stats.unpaidInvoices.length} hoa don chua dong</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">{stats.unpaidInvoices.length} hóa đơn chưa đóng</p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-500 rounded-lg">
             <AlertCircle className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+        <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-500">Da thu thang nay</h3>
-            <p className="text-3xl font-bold mt-2 text-gray-900">{currency.format(stats.paidAmount)}</p>
+            <h3 className="font-medium text-muted-foreground">Đã thu tháng này</h3>
+            <p className="text-3xl font-bold mt-2 text-foreground">{currency.format(stats.paidAmount)}</p>
           </div>
-          <div className="p-3 bg-gray-50 text-gray-600 rounded-lg">
+          <div className="p-3 bg-muted text-muted-foreground rounded-lg">
             <DollarSign className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-lg text-gray-900">Hoa don can thu</h3>
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="p-6 border-b border-border flex justify-between items-center">
+            <h3 className="font-bold text-lg text-foreground">Hóa đơn cần thu</h3>
             <Link href="/dashboard/owner/invoices" className="text-sm text-blue-600 font-medium hover:underline">
-              Xem tat ca
+              Xem tất cả
             </Link>
           </div>
           <div className="p-6">
@@ -189,56 +189,56 @@ export default function OwnerDashboard() {
                 const remaining = Math.max(invoice.totalAmount - getPaid(invoice), 0);
 
                 return (
-                  <div key={invoice.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-50 bg-gray-50/50">
+                  <div key={invoice.id} className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
                         {invoice.contract.room.name}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{invoice.contract.tenant.name}</p>
-                        <p className="text-sm text-gray-500">{invoice.title}</p>
+                        <p className="font-medium text-foreground">{invoice.contract.tenant.name}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.title}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-gray-900">{currency.format(remaining)} d</p>
+                      <p className="font-bold text-foreground">{currency.format(remaining)} đ</p>
                       <span className="inline-block px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-md mt-1">
-                        {invoice.status === "PARTIAL" ? "Dong thieu" : "Chua thanh toan"}
+                        {invoice.status === "PARTIAL" ? "Đóng thiếu" : "Chưa thanh toán"}
                       </span>
                     </div>
                   </div>
                 );
               })}
               {!loading && stats.unpaidInvoices.length === 0 && (
-                <p className="text-sm text-gray-500">Khong co hoa don can thu.</p>
+                <p className="text-sm text-muted-foreground">Không có hóa đơn cần thu.</p>
               )}
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-lg text-gray-900">Hop dong sap het han</h3>
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="p-6 border-b border-border flex justify-between items-center">
+            <h3 className="font-bold text-lg text-foreground">Hợp đồng sắp hết hạn</h3>
             <Link href="/dashboard/owner/tenants" className="text-sm text-blue-600 font-medium hover:underline">
-              Quan ly
+              Quản lý
             </Link>
           </div>
           <div className="p-6">
             <div className="space-y-4">
               {expiringContracts.map((contract) => (
-                <div key={contract.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-50 bg-gray-50/50">
+                <div key={contract.id} className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                       {contract.room.name}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{contract.tenant.name}</p>
-                      <p className="text-sm text-red-500 font-medium">Het han trong {contract.daysLeft} ngay toi</p>
+                      <p className="font-medium text-foreground">{contract.tenant.name}</p>
+                      <p className="text-sm text-red-500 font-medium">Hết hạn trong {contract.daysLeft} ngày tới</p>
                     </div>
                   </div>
                 </div>
               ))}
               {!loading && expiringContracts.length === 0 && (
-                <p className="text-sm text-gray-500">Khong co hop dong sap het han.</p>
+                <p className="text-sm text-muted-foreground">Không có hợp đồng sắp hết hạn.</p>
               )}
             </div>
           </div>
