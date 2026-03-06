@@ -1,10 +1,7 @@
-// app/page.tsx
+// app/(marketing)/page.tsx
 import Link from "next/link";
-// import prisma from "@/lib/prisma";
 
 export default async function Home() {
-  // const users = await prisma.user.findMany();
-
   return (
     <div className="flex flex-col items-center justify-center w-full">
       {/* Hero Section */}
