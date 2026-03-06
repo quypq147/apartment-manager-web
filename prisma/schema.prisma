@@ -1,23 +1,167 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // Hoặc mysql, tùy thuộc vào database bạn dùng
+  url      = env("DATABASE_URL")
 }
 
-model User { 
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique
-  name  String?
-  posts Post[]
-} 
-model Post { 
-  id        Int     @id @default(autoincrement()) 
-  title     String
-  content   String?
-  published Boolean @default(false) 
-  authorId  Int
-  author    User    @relation(fields: [authorId], references: [id]) 
-} 
+// ---------------------------------------------------------------------------
+// ENUMS (Các hằng số trạng thái)
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN       // Quản trị viên hệ thống
+  LANDLORD    // Chủ trọ / Quản lý tòa nhà
+  TENANT      // Khách thuê
+}
+
+enum RoomStatus {
+  AVAILABLE   // Phòng trống
+  RENTED      // Đã cho thuê
+  MAINTENANCE // Đang sửa chữa
+}
+
+enum ContractStatus {
+  ACTIVE      // Đang có hiệu lực
+  EXPIRED     // Đã hết hạn
+  TERMINATED  // Đã chấm dứt (chuyển đi trước hạn)
+}
+
+enum InvoiceStatus {
+  UNPAID      // Chưa thanh toán
+  PARTIAL     // Thanh toán một phần
+  PAID        // Đã thanh toán
+  OVERDUE     // Quá hạn
+}
+
+// ---------------------------------------------------------------------------
+// MODELS (Các bảng dữ liệu)
+// ---------------------------------------------------------------------------
+
+// 1. NGƯỜI DÙNG (Chủ trọ và Người thuê)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Lưu mật khẩu đã hash
+  name      String
+  phone     String?  @unique
+  cccd      String?  @unique // Căn cước công dân (rất quan trọng ở VN để khai báo tạm trú)
+  role      Role     @default(TENANT)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Quan hệ: Một chủ trọ có nhiều Khu trọ
+  ownedProperties Property[] @relation("LandlordProperties")
+  
+  // Quan hệ: Một khách thuê có thể có nhiều hợp đồng (lịch sử thuê)
+  contracts       Contract[] @relation("TenantContracts")
+}
+
+// 2. KHU TRỌ / TÒA NHÀ
+model Property {
+  id          String   @id @default(cuid())
+  name        String   // VD: Chung cư mini số 1, Trọ hẻm 123...
+  address     String   // Địa chỉ chi tiết
+  description String?  // Mô tả thêm
+  
+  landlordId  String
+  landlord    User     @relation("LandlordProperties", fields: [landlordId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rooms       Room[]
+  services    Service[] // Các dịch vụ cấu hình riêng cho khu này (VD: Điện 4k, Nước 20k)
+}
+
+// 3. PHÒNG TRỌ / CĂN HỘ
+model Room {
+  id          String     @id @default(cuid())
+  name        String     // VD: Phòng 101, Phòng 102
+  price       Float      // Giá thuê phòng mỗi tháng
+  area        Float?     // Diện tích (m2)
+  capacity    Int        // Số người ở tối đa
+  status      RoomStatus @default(AVAILABLE)
+  
+  propertyId  String
+  property    Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  contracts   Contract[]
+  invoices    Invoice[]
+}
+
+// 4. CẤU HÌNH DỊCH VỤ CỦA KHU TRỌ (Điện, nước, rác, wifi...)
+model Service {
+  id          String   @id @default(cuid())
+  name        String   // VD: Điện, Nước, Wifi, Rác, Gửi xe
+  unit        String   // Đơn vị tính: "kWh", "Khối", "Người", "Phòng", "Chiếc"
+  price       Float    // Đơn giá dịch vụ
+  
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  invoiceItems InvoiceItem[]
+}
+
+// 5. HỢP ĐỒNG THUÊ PHÒNG
+model Contract {
+  id          String         @id @default(cuid())
+  deposit     Float          // Tiền cọc
+  startDate   DateTime       // Ngày bắt đầu tính tiền
+  endDate     DateTime?      // Ngày hết hạn hợp đồng
+  status      ContractStatus @default(ACTIVE)
+  notes       String?        // Ghi chú thêm
+  
+  roomId      String
+  room        Room           @relation(fields: [roomId], references: [id])
+  
+  tenantId    String
+  tenant      User           @relation("TenantContracts", fields: [tenantId], references: [id])
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+// 6. HÓA ĐƠN HÀNG THÁNG
+model Invoice {
+  id          String        @id @default(cuid())
+  title       String        // VD: Tiền phòng tháng 10/2023
+  month       Int           // Tháng
+  year        Int           // Năm
+  roomPrice   Float         // Tiền phòng gốc của tháng đó
+  totalAmount Float         // Tổng cộng các khoản cần thu
+  status      InvoiceStatus @default(UNPAID)
+  dueDate     DateTime?     // Hạn chót thanh toán
+  
+  roomId      String
+  room        Room          @relation(fields: [roomId], references: [id])
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  items       InvoiceItem[] // Chi tiết các khoản thu (Điện, nước,...)
+}
+
+// 7. CHI TIẾT HÓA ĐƠN (Ghi điện, nước hàng tháng)
+model InvoiceItem {
+  id           String   @id @default(cuid())
+  
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  serviceId    String
+  service      Service  @relation(fields: [serviceId], references: [id])
+  
+  oldIndicator Float?   // Chỉ số cũ (Dành riêng cho Điện / Nước)
+  newIndicator Float?   // Chỉ số mới (Dành riêng cho Điện / Nước)
+  
+  quantity     Float    // Số lượng tiêu thụ (VD: 50 số điện, 3 khối nước, hoặc 1 đối với phí Wifi)
+  unitPrice    Float    // Đơn giá tại thời điểm chốt (tránh trường hợp sau này đổi giá dịch vụ làm sai lệch lịch sử)
+  amount       Float    // Thành tiền (quantity * unitPrice)
+}
