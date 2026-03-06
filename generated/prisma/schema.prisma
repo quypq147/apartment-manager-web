@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql" // Hoặc mysql
+}
+
+// ---------------------------------------------------------------------------
+// ENUMS (Các hằng số trạng thái)
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  LANDLORD
+  TENANT
+}
+
+enum RoomStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+}
+
+enum ContractStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+}
+
+// ---------------------------------------------------------------------------
+// MODELS (Các bảng dữ liệu)
+// ---------------------------------------------------------------------------
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String
+  name     String
+  phone    String? @unique
+  cccd     String? @unique
+  role     Role    @default(TENANT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedProperties Property[] @relation("LandlordProperties")
+  contracts       Contract[] @relation("TenantContracts")
+}
+
+model Property {
+  id          String  @id @default(cuid())
+  name        String
+  address     String
+  description String?
+
+  landlordId String
+  landlord   User   @relation("LandlordProperties", fields: [landlordId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rooms    Room[]
+  services Service[]
+}
+
+model Room {
+  id       String     @id @default(cuid())
+  name     String
+  price    Float // Giá thuê tham khảo tại thời điểm hiện tại
+  area     Float?
+  capacity Int
+  status   RoomStatus @default(AVAILABLE)
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contracts Contract[]
+}
+
+model Service {
+  id        String  @id @default(cuid())
+  name      String
+  unit      String
+  price     Float // Đơn giá tham khảo tại thời điểm hiện tại
+  isMetered Boolean @default(false) // Đánh dấu Dịch vụ dùng đồng hồ đo (VD: Điện, Nước)
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  invoiceItems InvoiceItem[]
+}
+
+model Contract {
+  id        String         @id @default(cuid())
+  deposit   Float
+  roomPrice Float // GIÁ PHÒNG CHỐT THEO HỢP ĐỒNG (Bảo vệ dữ liệu lịch sử)
+  startDate DateTime
+  endDate   DateTime?
+  status    ContractStatus @default(ACTIVE)
+  notes     String?
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  tenantId String
+  tenant   User   @relation("TenantContracts", fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[] // Hóa đơn được sinh ra dựa trên Hợp đồng này
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  title       String
+  month       Int
+  year        Int
+  totalAmount Float // Tổng cộng các khoản (Snapshot dữ liệu tài chính)
+  status      InvoiceStatus @default(UNPAID)
+  dueDate     DateTime?
+
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[] // Lịch sử thu tiền
+}
+
+model InvoiceItem {
+  id String @id @default(cuid())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  oldIndicator Float?
+  newIndicator Float?
+
+  quantity  Float
+  unitPrice Float // ĐƠN GIÁ CHỐT TẠI THÁNG ĐÓ
+  amount    Float // = quantity * unitPrice (Snapshot)
+}
+
+// BẢNG MỚI: PHIẾU THU TỪNG LẦN THANH TOÁN
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float // Số tiền khách đã thanh toán lần này
+  paymentMethod PaymentMethod @default(CASH)
+  reference     String? // Mã giao dịch ngân hàng / Ghi chú
+  paymentDate   DateTime      @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
