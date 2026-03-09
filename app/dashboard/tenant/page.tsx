@@ -1,49 +1,84 @@
 // app/dashboard/tenant/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { getTenantDashboard, type TenantDashboardInvoice } from "@/lib/api/tenant";
 import {
   Home,
   AlertCircle,
-  DollarSign,
   QrCode,
   X,
 } from "lucide-react";
 
+function formatDate(input: string | null) {
+  if (!input) {
+    return "--";
+  }
+
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return "--";
+  }
+
+  return date.toLocaleDateString("vi-VN");
+}
+
 export default function TenantDashboard() {
   const [showQRCode, setShowQRCode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [roomInfo, setRoomInfo] = useState<{
+    name: string;
+    property: string;
+    address: string;
+    price: number;
+    area: number | null;
+    contractStartDate: string;
+    contractEndDate: string | null;
+  } | null>(null);
+  const [unpaidInvoices, setUnpaidInvoices] = useState<TenantDashboardInvoice[]>([]);
 
-  // Mock data - later replace with actual data from API
-  const roomInfo = {
-    name: "Phòng 101",
-    property: "Khu trọ Đường Tây Sơn",
-    address: "123 Đường Tây Sơn, Quận Đống Đa, Hà Nội",
-    price: 3500000,
-    area: 25,
-    contractStartDate: "2024-06-01",
-    contractEndDate: "2025-06-01",
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  const unpaidInvoices = [
-    {
-      id: "INV001",
-      month: 3,
-      year: 2026,
-      totalAmount: 3500000,
-      status: "UNPAID",
-      dueDate: "2026-03-15",
-    },
-    {
-      id: "INV002",
-      month: 2,
-      year: 2026,
-      totalAmount: 3850000,
-      status: "PARTIAL",
-      paidAmount: 2000000,
-      dueDate: "2026-02-15",
-    },
-  ];
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getTenantDashboard();
+
+      if (cancelled) {
+        return;
+      }
+
+      if (!result.success) {
+        setError(result.error ?? "Không thể tải dữ liệu tổng quan");
+        setLoading(false);
+        return;
+      }
+
+      setRoomInfo(result.data?.roomInfo ?? null);
+      setUnpaidInvoices(result.data?.unpaidInvoices ?? []);
+      setError(null);
+      setLoading(false);
+    };
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const outstandingAmount = useMemo(
+    () =>
+      unpaidInvoices.reduce((sum, invoice) => {
+        if (invoice.status === "PARTIAL") {
+          return sum + Math.max(0, invoice.totalAmount - invoice.paidAmount);
+        }
+        return sum + invoice.totalAmount;
+      }, 0),
+    [unpaidInvoices]
+  );
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -57,7 +92,19 @@ export default function TenantDashboard() {
         </div>
       </header>
 
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {!loading && !roomInfo && (
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <p className="text-sm text-muted-foreground">
+            Hiện tại bạn chưa có hợp đồng thuê đang hiệu lực.
+          </p>
+        </div>
+      )}
+
       {/* Room Information Card */}
+      {roomInfo && (
       <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
@@ -79,7 +126,9 @@ export default function TenantDashboard() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Diện tích</p>
-              <p className="font-medium text-foreground mt-1">{roomInfo.area}m²</p>
+              <p className="font-medium text-foreground mt-1">
+                {typeof roomInfo.area === "number" ? `${roomInfo.area}m²` : "--"}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Giá thuê hàng tháng</p>
@@ -90,15 +139,16 @@ export default function TenantDashboard() {
             <div>
               <p className="text-sm text-muted-foreground">Thời hạn hợp đồng</p>
               <p className="font-medium text-foreground mt-1">
-                {roomInfo.contractStartDate} đến {roomInfo.contractEndDate}
+                {formatDate(roomInfo.contractStartDate)} đến {formatDate(roomInfo.contractEndDate)}
               </p>
             </div>
           </div>
         </div>
       </div>
+      )}
 
       {/* Unpaid Invoices Alert */}
-      {unpaidInvoices.length > 0 && (
+      {!loading && unpaidInvoices.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
           <div className="flex items-start gap-4">
             <div className="shrink-0">
@@ -132,7 +182,7 @@ export default function TenantDashboard() {
       )}
 
       {/* Unpaid Invoices Summary */}
-      {unpaidInvoices.length > 0 && (
+      {!loading && unpaidInvoices.length > 0 && (
         <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <div className="p-6 border-b border-border">
             <h3 className="font-bold text-lg text-foreground">
@@ -155,7 +205,7 @@ export default function TenantDashboard() {
                         Hóa đơn tháng {invoice.month}/{invoice.year}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Hạn chốt: {invoice.dueDate}
+                        Hạn chốt: {formatDate(invoice.dueDate)}
                       </p>
                       {invoice.status === "PARTIAL" && (
                         <p className="text-sm text-blue-600 font-medium">
@@ -213,7 +263,7 @@ export default function TenantDashboard() {
               <div className="bg-muted rounded-lg p-4">
                 <p className="text-xs text-muted-foreground">Tổng số tiền cần thanh toán</p>
                 <p className="text-2xl font-bold text-foreground mt-1">
-                  {unpaidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0).toLocaleString("vi-VN")} đ
+                  {outstandingAmount.toLocaleString("vi-VN")} đ
                 </p>
               </div>
               <div className="bg-blue-50 rounded-lg p-4">

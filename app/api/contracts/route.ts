@@ -133,13 +133,15 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      const actualRoomPrice =
+        typeof roomPrice === "number" && roomPrice > 0 ? roomPrice : room.price;
+
       const contract = await tx.contract.create({
         data: {
           roomId: room.id,
           tenantId: tenant.id,
           deposit,
-          roomPrice:
-            typeof roomPrice === "number" && roomPrice > 0 ? roomPrice : room.price,
+          roomPrice: actualRoomPrice,
           startDate: parsedStartDate,
           endDate: parsedEndDate,
           notes: notes?.trim() || null,
@@ -168,6 +170,19 @@ export async function POST(request: NextRequest) {
       await tx.room.update({
         where: { id: room.id },
         data: { status: "RENTED" },
+      });
+
+      const now = new Date();
+      await tx.invoice.create({
+        data: {
+          title: `Hóa đơn tháng ${now.getMonth() + 1}/${now.getFullYear()} (Tháng đầu + Cọc)`,
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+          totalAmount: deposit + actualRoomPrice,
+          status: "UNPAID",
+          dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+          contractId: contract.id,
+        },
       });
 
       return contract;

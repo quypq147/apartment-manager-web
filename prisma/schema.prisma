@@ -41,6 +41,13 @@ enum PaymentMethod {
   BANK_TRANSFER
 }
 
+enum InvoiceItemType {
+  ROOM_FEE
+  DEPOSIT
+  SERVICE
+  OTHER
+}
+
 // ---------------------------------------------------------------------------
 // MODELS (Các bảng dữ liệu)
 // ---------------------------------------------------------------------------
@@ -152,9 +159,12 @@ model InvoiceItem {
   
   invoiceId    String
   invoice      Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  type         InvoiceItemType @default(SERVICE)
+  description  String?
   
-  serviceId    String
-  service      Service  @relation(fields: [serviceId], references: [id])
+  serviceId    String?
+  service      Service? @relation(fields: [serviceId], references: [id])
   
   oldIndicator Float?     
   newIndicator Float?     

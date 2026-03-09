@@ -1,74 +1,62 @@
 // app/dashboard/tenant/invoices/page.tsx
 "use client";
 
-import { useState } from "react";
-import { FileText, Filter, Download, DollarSign, AlertCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { getTenantInvoices, type TenantInvoice } from "@/lib/api/tenant";
+import { FileText, Filter, Download } from "lucide-react";
+
+function formatDate(input: string | null) {
+  if (!input) {
+    return "--";
+  }
+
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return "--";
+  }
+
+  return date.toLocaleDateString("vi-VN");
+}
 
 export default function TenantInvoices() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [invoices, setInvoices] = useState<TenantInvoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - later replace with actual data from API
-  const invoices = [
-    {
-      id: "INV-2026-03-001",
-      month: 3,
-      year: 2026,
-      totalAmount: 3500000,
-      status: "UNPAID",
-      dueDate: "2026-03-15",
-      createdDate: "2026-03-01",
-      items: [
-        { name: "Tiền phòng tháng 3", quantity: 1, amount: 3500000 },
-      ],
-    },
-    {
-      id: "INV-2026-02-001",
-      month: 2,
-      year: 2026,
-      totalAmount: 3850000,
-      status: "PARTIAL",
-      dueDate: "2026-02-15",
-      createdDate: "2026-02-01",
-      paidAmount: 2000000,
-      items: [
-        { name: "Tiền phòng tháng 2", quantity: 1, amount: 3500000 },
-        { name: "Tiền nước", quantity: 5, unit: "m³", amount: 150000 },
-        { name: "Tiền điện", quantity: 200, unit: "kWh", amount: 200000 },
-      ],
-    },
-    {
-      id: "INV-2026-01-001",
-      month: 1,
-      year: 2026,
-      totalAmount: 3500000,
-      status: "PAID",
-      dueDate: "2026-01-15",
-      createdDate: "2026-01-01",
-      paidDate: "2026-01-14",
-      items: [
-        { name: "Tiền phòng tháng 1", quantity: 1, amount: 3500000 },
-      ],
-    },
-    {
-      id: "INV-2025-12-001",
-      month: 12,
-      year: 2025,
-      totalAmount: 3700000,
-      status: "PAID",
-      dueDate: "2025-12-15",
-      createdDate: "2025-12-01",
-      paidDate: "2025-12-10",
-      items: [
-        { name: "Tiền phòng tháng 12", quantity: 1, amount: 3500000 },
-        { name: "Tiền nước", quantity: 6, unit: "m³", amount: 200000 },
-      ],
-    },
-  ];
+  useEffect(() => {
+    let cancelled = false;
 
-  const filteredInvoices =
-    selectedStatus === "all"
-      ? invoices
-      : invoices.filter((inv) => inv.status === selectedStatus);
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getTenantInvoices();
+
+      if (cancelled) {
+        return;
+      }
+
+      if (!result.success) {
+        setError(result.error ?? "Không thể tải danh sách hóa đơn");
+        setLoading(false);
+        return;
+      }
+
+      setInvoices(result.data ?? []);
+      setError(null);
+      setLoading(false);
+    };
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredInvoices = useMemo(
+    () => (selectedStatus === "all" ? invoices : invoices.filter((inv) => inv.status === selectedStatus)),
+    [invoices, selectedStatus]
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -105,6 +93,9 @@ export default function TenantInvoices() {
           <p className="text-muted-foreground mt-1">Xem lịch sử hóa đơn và tình trạng thanh toán.</p>
         </div>
       </header>
+
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -193,7 +184,7 @@ export default function TenantInvoices() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-muted-foreground text-sm">
-                      {invoice.dueDate}
+                      {formatDate(invoice.dueDate)}
                     </td>
                     <td className="px-6 py-4">
                       <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -263,11 +254,11 @@ export default function TenantInvoices() {
                   <span className="font-medium text-foreground">{filteredInvoices[0].id}</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Ngày lập: <span className="font-medium text-foreground">{filteredInvoices[0].createdDate}</span>
+                  Ngày lập: <span className="font-medium text-foreground">{formatDate(filteredInvoices[0].createdDate)}</span>
                 </p>
                 {filteredInvoices[0].paidDate && (
                   <p className="text-sm text-muted-foreground">
-                    Ngày thanh toán: <span className="font-medium text-green-600">{filteredInvoices[0].paidDate}</span>
+                    Ngày thanh toán: <span className="font-medium text-green-600">{formatDate(filteredInvoices[0].paidDate)}</span>
                   </p>
                 )}
               </div>

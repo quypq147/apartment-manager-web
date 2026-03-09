@@ -1,24 +1,83 @@
 // app/dashboard/tenant/contracts/page.tsx
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import { getTenantContracts, type TenantContract } from "@/lib/api/tenant";
 import { BookOpen, Download } from "lucide-react";
 
+function formatDate(input: string | null) {
+  if (!input) {
+    return "--";
+  }
+
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return "--";
+  }
+
+  return date.toLocaleDateString("vi-VN");
+}
+
+function getRemainingTime(endDate: string | null) {
+  if (!endDate) {
+    return "Không thời hạn";
+  }
+
+  const now = new Date();
+  const end = new Date(endDate);
+  if (Number.isNaN(end.getTime())) {
+    return "--";
+  }
+
+  const diffMs = end.getTime() - now.getTime();
+  if (diffMs <= 0) {
+    return "Đã hết hạn";
+  }
+
+  const totalDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  return `${months} tháng ${days} ngày`;
+}
+
 export default function TenantContracts() {
-  // Mock data - later replace with actual data from API
-  const contracts = [
-    {
-      id: "CT-2024-001",
-      roomName: "Phòng 101",
-      property: "Khu trọ Đường Tây Sơn",
-      landlord: "Nguyễn Văn A",
-      startDate: "2024-06-01",
-      endDate: "2025-06-01",
-      status: "ACTIVE",
-      deposit: 5000000,
-      roomPrice: 3500000,
-      terms: "Hợp đồng 12 tháng, thanh toán hàng tháng vào ngày 1",
-    },
-  ];
+  const [contracts, setContracts] = useState<TenantContract[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getTenantContracts();
+
+      if (cancelled) {
+        return;
+      }
+
+      if (!result.success) {
+        setError(result.error ?? "Không thể tải dữ liệu hợp đồng");
+        setLoading(false);
+        return;
+      }
+
+      setContracts(result.data ?? []);
+      setError(null);
+      setLoading(false);
+    };
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const sortedContracts = useMemo(
+    () => [...contracts].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()),
+    [contracts]
+  );
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -30,9 +89,17 @@ export default function TenantContracts() {
         </div>
       </header>
 
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {!loading && !error && sortedContracts.length === 0 && (
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <p className="text-sm text-muted-foreground">Bạn chưa có hợp đồng nào.</p>
+        </div>
+      )}
+
       {/* Contracts List */}
       <div className="space-y-6">
-        {contracts.map((contract) => (
+        {sortedContracts.map((contract) => (
           <div
             key={contract.id}
             className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden"
@@ -49,8 +116,20 @@ export default function TenantContracts() {
                     <p className="text-sm text-muted-foreground">Mã hợp đồng: {contract.id}</p>
                   </div>
                 </div>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 flex-shrink-0">
-                  {contract.status === "ACTIVE" ? "Đang hoạt động" : "Hết hạn"}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium flex-shrink-0 ${
+                    contract.status === "ACTIVE"
+                      ? "bg-green-100 text-green-700"
+                      : contract.status === "EXPIRED"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {contract.status === "ACTIVE"
+                    ? "Đang hoạt động"
+                    : contract.status === "EXPIRED"
+                      ? "Hết hạn"
+                      : "Đã thanh lý"}
                 </span>
               </div>
             </div>
@@ -64,12 +143,12 @@ export default function TenantContracts() {
                 <div>
                   <p className="text-sm text-muted-foreground">Thời hạn</p>
                   <p className="font-medium text-foreground mt-2">
-                    {contract.startDate} đến {contract.endDate}
+                    {formatDate(contract.startDate)} đến {formatDate(contract.endDate)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Thời gian còn lại</p>
-                  <p className="font-medium text-foreground mt-2">3 tháng 25 ngày</p>
+                  <p className="font-medium text-foreground mt-2">{getRemainingTime(contract.endDate)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Giá thuê hàng tháng</p>
@@ -85,7 +164,7 @@ export default function TenantContracts() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Điều khoản chính</p>
-                  <p className="font-medium text-foreground mt-2 text-sm">{contract.terms}</p>
+                  <p className="font-medium text-foreground mt-2 text-sm">{contract.terms || "--"}</p>
                 </div>
               </div>
 
