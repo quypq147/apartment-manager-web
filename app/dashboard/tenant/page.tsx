@@ -3,13 +3,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getTenantDashboard, type TenantDashboardInvoice } from "@/lib/api/tenant";
+import { getTenantDashboard, getTenantNotifications, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
 import {
   Home,
   AlertCircle,
   QrCode,
   X,
 } from "lucide-react";
+import { NotificationsList } from "@/components/notification-card";
 
 function formatDate(input: string | null) {
   if (!input) {
@@ -38,28 +39,39 @@ export default function TenantDashboard() {
     contractEndDate: string | null;
   } | null>(null);
   const [unpaidInvoices, setUnpaidInvoices] = useState<TenantDashboardInvoice[]>([]);
+  const [notifications, setNotifications] = useState<TenantNotification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadData = async () => {
       setLoading(true);
-      const result = await getTenantDashboard();
+      const [dashResult, notifResult] = await Promise.all([
+        getTenantDashboard(),
+        getTenantNotifications(),
+      ]);
 
       if (cancelled) {
         return;
       }
 
-      if (!result.success) {
-        setError(result.error ?? "Không thể tải dữ liệu tổng quan");
+      if (!dashResult.success) {
+        setError(dashResult.error ?? "Không thể tải dữ liệu tổng quan");
         setLoading(false);
+        setNotificationsLoading(false);
         return;
       }
 
-      setRoomInfo(result.data?.roomInfo ?? null);
-      setUnpaidInvoices(result.data?.unpaidInvoices ?? []);
+      setRoomInfo(dashResult.data?.roomInfo ?? null);
+      setUnpaidInvoices(dashResult.data?.unpaidInvoices ?? []);
       setError(null);
       setLoading(false);
+
+      if (notifResult.success) {
+        setNotifications(notifResult.data ?? []);
+      }
+      setNotificationsLoading(false);
     };
 
     void loadData();
@@ -91,6 +103,20 @@ export default function TenantDashboard() {
           </p>
         </div>
       </header>
+
+      {/* Notifications Section */}
+      {notifications.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-blue-900 mb-4">Thông báo quan trọng</h2>
+          <NotificationsList
+            notifications={notifications}
+            loading={notificationsLoading}
+            onDismiss={(id) => {
+              setNotifications(notifications.filter(n => n.id !== id));
+            }}
+          />
+        </div>
+      )}
 
       {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}

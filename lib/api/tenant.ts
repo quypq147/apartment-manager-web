@@ -57,8 +57,26 @@ export interface TenantDashboardData {
   unpaidInvoices: TenantDashboardInvoice[];
 }
 
+export interface TenantNotification {
+  id: string;
+  type: "invoice_due" | "contract_expiring" | "invoice_overdue";
+  title: string;
+  message: string;
+  dueDate?: string;
+  expiryDate?: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export function getTenantDashboard(userId?: string): Promise<ApiResult<TenantDashboardData>> {
   return apiRequest<TenantDashboardData>("/api/tenant/dashboard", {
+    userId,
+    role: "TENANT",
+  });
+}
+
+export function getTenantNotifications(userId?: string): Promise<ApiResult<TenantNotification[]>> {
+  return apiRequest<TenantNotification[]>("/api/tenant/notifications", {
     userId,
     role: "TENANT",
   });

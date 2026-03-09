@@ -106,6 +106,29 @@ export interface CreateContractPayload {
   notes?: string;
 }
 
+export interface OwnerDashboardStats {
+  totalRooms: number;
+  rentedRooms: number;
+  availableRooms: number;
+  occupancyRate: number;
+  expectedRevenue: number;
+  actualRevenue: number;
+  pendingRevenue: number;
+  overdueInvoices: Array<{
+    id: string;
+    title: string;
+    tenantName: string;
+    roomName: string;
+    amount: number;
+    daysOverdue: number;
+  }>;
+  revenueChartData: Array<{
+    month: string;
+    expected: number;
+    actual: number;
+  }>;
+}
+
 export function getProperties(userId?: string): Promise<ApiResult<OwnerProperty[]>> {
   return apiRequest<OwnerProperty[]>("/api/properties", { userId });
 }
@@ -132,6 +155,12 @@ export function getInvoices(params?: {
   const suffix = search.toString() ? `?${search.toString()}` : "";
   return apiRequest<OwnerInvoice[]>(`/api/invoices${suffix}`, {
     userId: params?.userId,
+  });
+}
+
+export function getDashboardStats(userId?: string): Promise<ApiResult<OwnerDashboardStats>> {
+  return apiRequest<OwnerDashboardStats>("/api/owner/dashboard-stats", {
+    userId,
   });
 }
 

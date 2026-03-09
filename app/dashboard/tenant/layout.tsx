@@ -1,4 +1,6 @@
 // app/dashboard/tenant/layout.tsx
+"use client";
+
 import Link from "next/link";
 import { 
   Home, 
@@ -8,6 +10,7 @@ import {
   LogOut,
   Menu
 } from "lucide-react";
+import { NavLink } from "@/components/nav-link";
 
 export default function TenantLayout({
   children,
@@ -33,26 +36,35 @@ export default function TenantLayout({
             Tài khoản tôi
           </div>
           
-          <Link href="/dashboard/tenant" className="flex items-center gap-3 px-3 py-2.5 text-blue-700 bg-blue-50 rounded-lg font-medium transition-colors">
-            <Home className="w-5 h-5" />
+          <NavLink
+            href="/dashboard/tenant"
+            icon={<Home className="w-5 h-5" />}
+            exact
+          >
             Tổng quan
-          </Link>
-          <Link href="/dashboard/tenant/invoices" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <FileText className="w-5 h-5" />
+          </NavLink>
+          <NavLink
+            href="/dashboard/tenant/invoices"
+            icon={<FileText className="w-5 h-5" />}
+          >
             Hóa đơn của tôi
-          </Link>
-          <Link href="/dashboard/tenant/contracts" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <BookOpen className="w-5 h-5" />
+          </NavLink>
+          <NavLink
+            href="/dashboard/tenant/contracts"
+            icon={<BookOpen className="w-5 h-5" />}
+          >
             Hợp đồng
-          </Link>
+          </NavLink>
 
           <div className="mb-4 mt-8 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Hệ thống
           </div>
-          <Link href="/dashboard/tenant/settings" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <Settings className="w-5 h-5" />
+          <NavLink
+            href="/dashboard/tenant/settings"
+            icon={<Settings className="w-5 h-5" />}
+          >
             Cài đặt
-          </Link>
+          </NavLink>
         </nav>
 
         <div className="border-t border-border p-4">

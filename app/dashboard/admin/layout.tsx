@@ -1,4 +1,6 @@
 // app/dashboard/admin/layout.tsx
+"use client";
+
 import Link from "next/link";
 import {
   Home,
@@ -8,6 +10,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
+import { NavLink } from "@/components/nav-link";
 
 export default function AdminLayout({
   children,
@@ -33,38 +36,39 @@ export default function AdminLayout({
             Quản lý hệ thống
           </div>
 
-          <Link
+          <NavLink
             href="/dashboard/admin"
-            className="flex items-center gap-3 px-3 py-2.5 text-purple-700 bg-purple-50 rounded-lg font-medium transition-colors"
+            icon={<Home className="w-5 h-5" />}
+            exact
+            activeClassName="text-purple-700 bg-purple-50"
           >
-            <Home className="w-5 h-5" />
             Tổng quan
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             href="/dashboard/admin/landlords"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            icon={<Users className="w-5 h-5" />}
+            activeClassName="text-purple-700 bg-purple-50"
           >
-            <Users className="w-5 h-5" />
             Quản lý Chủ trọ
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             href="/dashboard/admin/revenue"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            icon={<BarChart3 className="w-5 h-5" />}
+            activeClassName="text-purple-700 bg-purple-50"
           >
-            <BarChart3 className="w-5 h-5" />
             Thống kê doanh thu
-          </Link>
+          </NavLink>
 
           <div className="mb-4 mt-8 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Hệ thống
           </div>
-          <Link
+          <NavLink
             href="/dashboard/admin/settings"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            icon={<Settings className="w-5 h-5" />}
+            activeClassName="text-purple-700 bg-purple-50"
           >
-            <Settings className="w-5 h-5" />
             Cài đặt
-          </Link>
+          </NavLink>
         </nav>
 
         <div className="border-t border-border p-4">

@@ -1,4 +1,6 @@
 // app/dashboard/owner/layout.tsx
+"use client";
+
 import Link from "next/link";
 import { 
   Home, 
@@ -8,7 +10,8 @@ import {
   Settings, 
   LogOut,
   Menu
-} from "lucide-react"; // Import icon (nhớ cài lucide-react)
+} from "lucide-react";
+import { NavLink } from "@/components/nav-link";
 
 export default function OwnerLayout({
   children,
@@ -34,30 +37,41 @@ export default function OwnerLayout({
             Quản lý chính
           </div>
           
-          <Link href="/dashboard/owner" className="flex items-center gap-3 px-3 py-2.5 text-blue-700 bg-blue-50 rounded-lg font-medium transition-colors">
-            <Home className="w-5 h-5" />
+          <NavLink
+            href="/dashboard/owner"
+            icon={<Home className="w-5 h-5" />}
+            exact
+          >
             Tổng quan
-          </Link>
-          <Link href="/dashboard/owner/properties" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <Building className="w-5 h-5" />
+          </NavLink>
+          <NavLink
+            href="/dashboard/owner/properties"
+            icon={<Building className="w-5 h-5" />}
+          >
             Khu trọ & Phòng
-          </Link>
-          <Link href="/dashboard/owner/tenants" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <Users className="w-5 h-5" />
+          </NavLink>
+          <NavLink
+            href="/dashboard/owner/tenants"
+            icon={<Users className="w-5 h-5" />}
+          >
             Khách thuê
-          </Link>
-          <Link href="/dashboard/owner/invoices" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <FileText className="w-5 h-5" />
+          </NavLink>
+          <NavLink
+            href="/dashboard/owner/invoices"
+            icon={<FileText className="w-5 h-5" />}
+          >
             Hóa đơn
-          </Link>
+          </NavLink>
 
           <div className="mb-4 mt-8 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Hệ thống
           </div>
-          <Link href="/dashboard/owner/settings" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            <Settings className="w-5 h-5" />
+          <NavLink
+            href="/dashboard/owner/settings"
+            icon={<Settings className="w-5 h-5" />}
+          >
             Cài đặt
-          </Link>
+          </NavLink>
         </nav>
 
         <div className="border-t border-border p-4">
