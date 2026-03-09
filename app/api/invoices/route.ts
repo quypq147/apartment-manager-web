@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 interface CreateInvoiceItemInput {
   serviceId: string;
@@ -20,8 +21,9 @@ interface CreateInvoiceBody {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
 
     if (!userId || userRole !== "LANDLORD") {
       return NextResponse.json(
@@ -116,8 +118,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
 
     if (!userId || userRole !== "LANDLORD") {
       return NextResponse.json(

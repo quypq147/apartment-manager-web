@@ -12,23 +12,25 @@ interface RequestOptions {
   role?: string;
 }
 
-const FALLBACK_LANDLORD_ID =
-  process.env.NEXT_PUBLIC_DEMO_LANDLORD_ID ?? "landlord-demo-id";
-
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<ApiResult<T>> {
   const { method = "GET", body, userId, role = "LANDLORD" } = options;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (userId) {
+    headers["x-user-id"] = userId;
+    headers["x-user-role"] = role;
+  }
 
   try {
     const response = await fetch(endpoint, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": userId ?? FALLBACK_LANDLORD_ID,
-        "x-user-role": role,
-      },
+      headers,
+      credentials: "include",
       ...(body ? { body: JSON.stringify(body) } : {}),
       cache: "no-store",
     });

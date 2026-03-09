@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 interface CreateRoomBody {
   name: string;
@@ -9,15 +10,20 @@ interface CreateRoomBody {
 }
 
 interface RouteContext {
-  params: {
+  params:
+    | {
+        propertyId: string;
+      }
+    | Promise<{
     propertyId: string;
-  };
+      }>;
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id;
+    const userRole = currentUser?.role;
 
     if (!userId || userRole !== "LANDLORD") {
       return NextResponse.json(
@@ -25,8 +31,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { status: 401 }
       );
     }
+    const { propertyId } = await context.params;
 
-    const { propertyId } = context.params;
     if (!propertyId) {
       return NextResponse.json(
         { success: false, error: "propertyId is required" },

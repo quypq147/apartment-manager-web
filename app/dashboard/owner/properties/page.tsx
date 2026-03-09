@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, MapPin, DoorOpen } from "lucide-react";
 import {
@@ -233,6 +234,18 @@ export default function PropertiesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <Link
+                  href={`/dashboard/owner/properties/${property.id}`}
+                  className="px-3 py-1.5 text-sm font-medium text-card-foreground bg-background border border-border rounded-lg hover:bg-muted"
+                >
+                  Quan ly khu tro
+                </Link>
+                <Link
+                  href={`/dashboard/owner/properties/${property.id}/room`}
+                  className="px-3 py-1.5 text-sm font-medium text-card-foreground bg-background border border-border rounded-lg hover:bg-muted"
+                >
+                  Quan ly phong
+                </Link>
                 <button
                   onClick={() => {
                     setActiveRoomFormFor((prev) =>

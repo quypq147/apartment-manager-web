@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 interface CreatePropertyBody {
   name: string;
@@ -10,12 +11,13 @@ interface CreatePropertyBody {
 /**
  * GET /api/properties
  * Fetch all properties for the authenticated landlord
- * Headers required: x-user-id (landlord ID), x-user-role
+ * Auth source: cookie session (preferred), headers as fallback
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
 
     if (!userId || userRole !== "LANDLORD") {
       return NextResponse.json(
@@ -51,13 +53,14 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/properties
  * Create a new property for the authenticated landlord
- * Headers required: x-user-id (landlord ID), x-user-role
+ * Auth source: cookie session (preferred), headers as fallback
  * Body: { name, address, description? }
  */
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
 
     if (!userId || userRole !== "LANDLORD") {
       return NextResponse.json(
