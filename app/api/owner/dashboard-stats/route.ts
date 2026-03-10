@@ -83,11 +83,13 @@ export async function GET(request: NextRequest) {
       }
 
       for (const contract of room.contracts) {
-        if (contract.status !== "ACTIVE") continue;
+        // Expected revenue: chỉ tính từ Contract ACTIVE (doanh thu kỳ vọng hàng tháng hiện tại)
+        if (contract.status === "ACTIVE") {
+          expectedRevenue += contract.roomPrice;
+        }
 
-        // Expected revenue from this contract (monthly)
-        expectedRevenue += contract.roomPrice;
-
+        // Actual revenue và overdue invoices: tính TẤT CẢ Invoice bất kể Contract status
+        // Vì Invoice đã phát sinh vẫn phải thu tiền dù hợp đồng hết hạn
         for (const invoice of contract.invoices) {
           // Actual revenue (paid amount)
           const paidAmount = await prisma.payment.aggregate({
@@ -146,15 +148,17 @@ export async function GET(request: NextRequest) {
     for (const property of user.ownedProperties) {
       for (const room of property.rooms) {
         for (const contract of room.contracts) {
-          if (contract.status !== "ACTIVE") continue;
-
           const invoicesInMonth = contract.invoices.filter(
             (inv: typeof contract.invoices[0]) => inv.month === month && inv.year === year
           );
 
           if (invoicesInMonth.length > 0) {
-            monthExpected += contract.roomPrice;
+            // Expected: chỉ tính Contract ACTIVE trong tháng đó
+            if (contract.status === "ACTIVE") {
+              monthExpected += contract.roomPrice;
+            }
 
+            // Actual: tính TẤT CẢ Invoice trong tháng đó (kể cả Contract đã EXPIRED)
             for (const invoice of invoicesInMonth) {
               const paidAmount = await prisma.payment.aggregate({
                 where: { invoiceId: invoice.id },

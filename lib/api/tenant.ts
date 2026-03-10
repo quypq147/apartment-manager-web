@@ -44,6 +44,75 @@ export interface TenantContract {
   terms: string | null;
 }
 
+export interface ContractInvoice {
+  id: string;
+  title: string;
+  month: number;
+  year: number;
+  totalAmount: number;
+  status: "UNPAID" | "PARTIAL" | "PAID" | "OVERDUE";
+  dueDate: string | null;
+  createdAt: string;
+  paidAmount: number;
+  remainingAmount: number;
+  items: Array<{
+    id: string;
+    type: string;
+    description: string | null;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+    service: {
+      id: string;
+      name: string;
+      unit: string;
+    } | null;
+  }>;
+  payments: Array<{
+    id: string;
+    amount: number;
+    paymentMethod: string;
+    paymentDate: string;
+  }>;
+}
+
+export interface ContractDetail {
+  id: string;
+  deposit: number;
+  roomPrice: number;
+  startDate: string;
+  endDate: string | null;
+  status: "ACTIVE" | "EXPIRED" | "TERMINATED";
+  notes: string | null;
+  createdAt: string;
+  room: {
+    id: string;
+    name: string;
+    price: number;
+    area: number | null;
+    capacity: number;
+    property: {
+      id: string;
+      name: string;
+      address: string;
+      landlord: {
+        id: string;
+        name: string;
+        email: string;
+        phone: string | null;
+      };
+    };
+  };
+  tenant: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    cccd: string | null;
+  };
+  invoices: ContractInvoice[];
+}
+
 export interface TenantDashboardData {
   roomInfo: {
     name: string;
@@ -93,5 +162,11 @@ export function getTenantContracts(userId?: string): Promise<ApiResult<TenantCon
   return apiRequest<TenantContract[]>("/api/tenant/contracts", {
     userId,
     role: "TENANT",
+  });
+}
+
+export function getContractDetail(contractId: string, userId?: string): Promise<ApiResult<ContractDetail>> {
+  return apiRequest<ContractDetail>(`/api/contracts/${contractId}`, {
+    userId,
   });
 }

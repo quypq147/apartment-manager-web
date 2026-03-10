@@ -3,7 +3,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getTenantContracts, type TenantContract } from "@/lib/api/tenant";
-import { BookOpen, Download } from "lucide-react";
+import { BookOpen, Download, Eye } from "lucide-react";
+import Link from "next/link";
 
 function formatDate(input: string | null) {
   if (!input) {
@@ -107,7 +108,7 @@ export default function TenantContracts() {
             <div className="p-6 border-b border-border">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-lg flex-shrink-0">
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0">
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <div>
@@ -117,7 +118,7 @@ export default function TenantContracts() {
                   </div>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium flex-shrink-0 ${
+                  className={`px-3 py-1 rounded-full text-sm font-medium shrink-0 ${
                     contract.status === "ACTIVE"
                       ? "bg-green-100 text-green-700"
                       : contract.status === "EXPIRED"
@@ -168,8 +169,15 @@ export default function TenantContracts() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-border">
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+              <div className="pt-6 border-t border-border flex gap-3">
+                <Link 
+                  href={`/dashboard/tenant/contracts/${contract.id}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                >
+                  <Eye className="w-5 h-5" />
+                  Xem chi tiết & Hóa đơn
+                </Link>
+                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
                   <Download className="w-5 h-5" />
                   Tải hợp đồng PDF
                 </button>

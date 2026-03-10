@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const activeContract = await prisma.contract.findFirst({
+    // Ưu tiên lấy Contract ACTIVE, nếu không có thì lấy EXPIRED gần nhất
+    let currentContract = await prisma.contract.findFirst({
       where: {
         tenantId: userId,
         status: "ACTIVE",
@@ -35,7 +36,30 @@ export async function GET(request: NextRequest) {
       orderBy: [{ createdAt: "desc" }],
     });
 
-    if (!activeContract) {
+    // Nếu không có ACTIVE, lấy EXPIRED gần nhất để hiển thị thông tin
+    if (!currentContract) {
+      currentContract = await prisma.contract.findFirst({
+        where: {
+          tenantId: userId,
+          status: "EXPIRED",
+        },
+        include: {
+          room: {
+            include: {
+              property: {
+                select: {
+                  name: true,
+                  address: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [{ endDate: "desc" }],
+      });
+    }
+
+    if (!currentContract) {
       return NextResponse.json(
         {
           success: true,
@@ -48,9 +72,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Lấy TẤT CẢ unpaid/partial invoices từ MỌI contract của tenant
+    // Vì Invoice đã phát sinh vẫn phải thanh toán dù hợp đồng hết hạn
+    const allContracts = await prisma.contract.findMany({
+      where: { tenantId: userId },
+      select: { id: true },
+    });
+
+    const contractIds = allContracts.map((c) => c.id);
+
     const invoices = await prisma.invoice.findMany({
       where: {
-        contractId: activeContract.id,
+        contractId: {
+          in: contractIds,
+        },
         status: {
           in: ["UNPAID", "PARTIAL"],
         },
@@ -84,13 +119,14 @@ export async function GET(request: NextRequest) {
         success: true,
         data: {
           roomInfo: {
-            name: activeContract.room.name,
-            property: activeContract.room.property.name,
-            address: activeContract.room.property.address,
-            price: activeContract.roomPrice,
-            area: activeContract.room.area,
-            contractStartDate: activeContract.startDate,
-            contractEndDate: activeContract.endDate,
+            name: currentContract.room.name,
+            property: currentContract.room.property.name,
+            address: currentContract.room.property.address,
+            price: currentContract.roomPrice,
+            area: currentContract.room.area,
+            contractStartDate: currentContract.startDate,
+            contractEndDate: currentContract.endDate,
+            contractStatus: currentContract.status,
           },
           unpaidInvoices,
         },

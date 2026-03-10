@@ -187,6 +187,10 @@ export async function POST(request: NextRequest) {
         throw new Error("CONTRACT_NOT_FOUND");
       }
 
+      if (contract.status !== "ACTIVE") {
+        throw new Error("CONTRACT_NOT_ACTIVE");
+      }
+
       const existed = await tx.invoice.findFirst({
         where: {
           contractId,
@@ -306,6 +310,13 @@ export async function POST(request: NextRequest) {
       if (error.message === "CONTRACT_NOT_FOUND") {
         return NextResponse.json(
           { success: false, error: "Contract not found" },
+          { status: 400 }
+        );
+      }
+
+      if (error.message === "CONTRACT_NOT_ACTIVE") {
+        return NextResponse.json(
+          { success: false, error: "Cannot create invoice for inactive contract. Please renew the contract first." },
           { status: 400 }
         );
       }

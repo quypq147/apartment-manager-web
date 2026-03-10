@@ -223,3 +223,17 @@ export function createContract(
     body: payload,
   });
 }
+
+export function renewContract(
+  contractId: string,
+  newEndDate: string,
+  userId?: string
+): Promise<ApiResult<unknown>> {
+  return apiRequest<unknown>(`/api/contracts/${contractId}`, {
+    method: "PATCH",
+    userId,
+    body: {
+      newEndDate,
+    },
+  });
+}
