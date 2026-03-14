@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getTenantDashboard, getTenantNotifications, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
+import { getTenantDashboard, getTenantNotifications, payTenantInvoice, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
 import {
   Home,
   AlertCircle,
@@ -29,6 +29,8 @@ export default function TenantDashboard() {
   const [showQRCode, setShowQRCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [roomInfo, setRoomInfo] = useState<{
     name: string;
     property: string;
@@ -92,6 +94,43 @@ export default function TenantDashboard() {
     [unpaidInvoices]
   );
 
+  const handleConfirmPayment = async () => {
+    if (unpaidInvoices.length === 0) {
+      setShowQRCode(false);
+      return;
+    }
+
+    setPaymentProcessing(true);
+    setPaymentMessage(null);
+    setError(null);
+
+    for (const invoice of unpaidInvoices) {
+      const remainingAmount = Math.max(invoice.totalAmount - invoice.paidAmount, 0);
+
+      if (remainingAmount <= 0) {
+        continue;
+      }
+
+      const result = await payTenantInvoice(
+        invoice.id,
+        remainingAmount,
+        undefined,
+        `TENANT-QR-${invoice.id}-${Date.now()}`
+      );
+
+      if (!result.success) {
+        setError(result.error ?? `Không thể thanh toán hóa đơn ${invoice.id}`);
+        setPaymentProcessing(false);
+        return;
+      }
+    }
+
+    setUnpaidInvoices([]);
+    setPaymentProcessing(false);
+    setShowQRCode(false);
+    setPaymentMessage("Thanh toán thành công. Công nợ đã được cập nhật.");
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -115,6 +154,12 @@ export default function TenantDashboard() {
               setNotifications(notifications.filter(n => n.id !== id));
             }}
           />
+        </div>
+      )}
+
+      {paymentMessage && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
+          <p className="text-sm font-medium text-green-700">{paymentMessage}</p>
         </div>
       )}
 
@@ -299,12 +344,22 @@ export default function TenantDashboard() {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowQRCode(false)}
-              className="w-full px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 font-medium transition-colors"
-            >
-              Đóng
-            </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={() => void handleConfirmPayment()}
+                disabled={paymentProcessing}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {paymentProcessing ? "Đang xử lý..." : "Xác nhận đã thanh toán"}
+              </button>
+              <button
+                onClick={() => setShowQRCode(false)}
+                disabled={paymentProcessing}
+                className="w-full px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

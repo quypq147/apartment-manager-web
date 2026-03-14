@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { generateNextInvoiceId } from "@/lib/invoice-id";
 
 interface CreateInvoiceItemInput {
   serviceId: string;
@@ -252,9 +253,11 @@ export async function POST(request: NextRequest) {
         0
       );
       const totalAmount = contract.roomPrice + servicesTotal;
+      const invoiceId = await generateNextInvoiceId(tx);
 
       return tx.invoice.create({
         data: {
+          id: invoiceId,
           contractId,
           title: title?.trim() || `Hóa đơn tháng ${month}/${year}`,
           month,

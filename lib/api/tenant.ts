@@ -31,6 +31,29 @@ export interface TenantInvoice {
   items: TenantInvoiceItem[];
 }
 
+export interface TenantPaymentResult {
+  payment: {
+    id: string;
+    amount: number;
+    paymentMethod: "CASH" | "BANK_TRANSFER";
+    reference: string | null;
+    paymentDate?: string;
+    invoiceId?: string;
+  };
+  invoice: {
+    id: string;
+    totalAmount: number;
+    status: "UNPAID" | "PARTIAL" | "PAID";
+    paidAmount: number;
+    remainingAmount: number;
+    payments: Array<{
+      id: string;
+      amount: number;
+      paymentDate?: string;
+    }>;
+  };
+}
+
 export interface TenantContract {
   id: string;
   roomName: string;
@@ -155,6 +178,24 @@ export function getTenantInvoices(userId?: string): Promise<ApiResult<TenantInvo
   return apiRequest<TenantInvoice[]>("/api/tenant/invoices", {
     userId,
     role: "TENANT",
+  });
+}
+
+export function payTenantInvoice(
+  invoiceId: string,
+  amount: number,
+  userId?: string,
+  reference?: string
+): Promise<ApiResult<TenantPaymentResult>> {
+  return apiRequest<TenantPaymentResult>(`/api/invoices/${invoiceId}/pay`, {
+    method: "POST",
+    userId,
+    role: "TENANT",
+    body: {
+      amount,
+      paymentMethod: "BANK_TRANSFER",
+      reference,
+    },
   });
 }
 

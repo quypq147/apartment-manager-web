@@ -6,6 +6,8 @@ import {
   Home, 
   FileText, 
   BookOpen, 
+  BedDouble,
+  Wrench,
   Settings, 
   LogOut,
   Menu
@@ -54,6 +56,18 @@ export default function TenantLayout({
             icon={<BookOpen className="w-5 h-5" />}
           >
             Hợp đồng
+          </NavLink>
+          <NavLink
+            href="/dashboard/tenant/room"
+            icon={<BedDouble className="w-5 h-5" />}
+          >
+            Quản lý phòng
+          </NavLink>
+          <NavLink
+            href="/dashboard/tenant/services"
+            icon={<Wrench className="w-5 h-5" />}
+          >
+            Quản lý dịch vụ
           </NavLink>
 
           <div className="mb-4 mt-8 text-xs font-semibold uppercase tracking-wider text-muted-foreground">

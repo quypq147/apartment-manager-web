@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
-import { createRoom, getProperties, type OwnerProperty } from "@/lib/api/owner";
+import {
+  createRoom,
+  getProperties,
+  getServices,
+  type OwnerProperty,
+  type OwnerService,
+} from "@/lib/api/owner";
 
 const currency = new Intl.NumberFormat("vi-VN");
 
@@ -20,6 +26,8 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [services, setServices] = useState<OwnerService[]>([]);
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [form, setForm] = useState({
     name: "",
     price: "",
@@ -31,16 +39,19 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
     const resolvedParams = await params;
     setPropertyId(resolvedParams.propertyId);
 
-    const result = await getProperties();
+    const [propertiesResult, servicesResult] = await Promise.all([
+      getProperties(),
+      getServices({ propertyId: resolvedParams.propertyId }),
+    ]);
 
-    if (!result.success) {
-      setError(result.error ?? "Khong the tai du lieu");
+    if (!propertiesResult.success || !servicesResult.success) {
+      setError(propertiesResult.error ?? servicesResult.error ?? "Khong the tai du lieu");
       setLoading(false);
       return;
     }
 
     const foundProperty =
-      result.data?.find((item) => item.id === resolvedParams.propertyId) ?? null;
+      propertiesResult.data?.find((item) => item.id === resolvedParams.propertyId) ?? null;
 
     if (!foundProperty) {
       setError("Khong tim thay khu tro");
@@ -49,6 +60,17 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
     }
 
     setProperty(foundProperty);
+    const loadedServices = servicesResult.data ?? [];
+    setServices(loadedServices);
+
+    const defaultServiceIds = loadedServices
+      .filter((service) => {
+        const normalizedName = service.name.trim().toLowerCase();
+        return normalizedName === "điện" || normalizedName === "nước";
+      })
+      .map((service) => service.id);
+
+    setSelectedServiceIds(defaultServiceIds);
     setError(null);
     setLoading(false);
   };
@@ -87,6 +109,7 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
       price: Number(form.price),
       capacity: Number(form.capacity),
       area: form.area ? Number(form.area) : undefined,
+      serviceIds: selectedServiceIds,
     });
 
     if (!result.success) {
@@ -104,6 +127,23 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
     setMessage("Them phong thanh cong");
     setCreating(false);
     await loadProperty();
+  };
+
+  const additionalServices = useMemo(() => {
+    return services.filter((service) => {
+      const normalizedName = service.name.trim().toLowerCase();
+      return normalizedName !== "điện" && normalizedName !== "nước";
+    });
+  }, [services]);
+
+  const handleToggleService = (serviceId: string) => {
+    setSelectedServiceIds((prev) => {
+      if (prev.includes(serviceId)) {
+        return prev.filter((id) => id !== serviceId);
+      }
+
+      return [...prev, serviceId];
+    });
   };
 
   return (
@@ -173,6 +213,38 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
               <Plus className="w-4 h-4" />
               {creating ? "Dang tao..." : "Them"}
             </button>
+          </div>
+
+          <div className="md:col-span-4 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">Dịch vụ áp dụng cho phòng</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+              <label className="inline-flex items-center gap-2 text-foreground">
+                <input type="checkbox" checked disabled />
+                Điện (gắn sẵn)
+              </label>
+              <label className="inline-flex items-center gap-2 text-foreground">
+                <input type="checkbox" checked disabled />
+                Nước (gắn sẵn)
+              </label>
+
+              {additionalServices.map((service) => (
+                <label key={service.id} className="inline-flex items-center gap-2 text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={selectedServiceIds.includes(service.id)}
+                    onChange={() => handleToggleService(service.id)}
+                  />
+                  {service.name} ({service.unit})
+                </label>
+              ))}
+            </div>
+
+            {additionalServices.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Chưa có dịch vụ tùy chọn khác. Bạn có thể thêm tại trang Quản lý Dịch vụ.
+              </p>
+            )}
           </div>
         </form>
       </section>

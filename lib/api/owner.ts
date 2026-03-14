@@ -62,6 +62,42 @@ export interface OwnerInvoice {
   }>;
 }
 
+export interface OwnerService {
+  id: string;
+  name: string;
+  unit: string;
+  price: number;
+  isMetered: boolean;
+  propertyId: string;
+  property: {
+    id: string;
+    name: string;
+    address: string;
+  };
+}
+
+export interface PayInvoiceResult {
+  payment: {
+    id: string;
+    amount: number;
+    paymentMethod: "CASH" | "BANK_TRANSFER";
+    reference: string | null;
+    paymentDate?: string;
+    invoiceId?: string;
+  };
+  invoice: {
+    id: string;
+    totalAmount: number;
+    status: "UNPAID" | "PARTIAL" | "PAID";
+    paidAmount: number;
+    remainingAmount: number;
+    payments: Array<{
+      id: string;
+      amount: number;
+    }>;
+  };
+}
+
 export interface CreatePropertyPayload {
   name: string;
   address: string;
@@ -73,6 +109,7 @@ export interface CreateRoomPayload {
   price: number;
   capacity: number;
   area?: number;
+  serviceIds?: string[];
 }
 
 export interface CreateInvoiceItemPayload {
@@ -90,6 +127,21 @@ export interface CreateInvoicePayload {
   title?: string;
   dueDate?: string;
   items: CreateInvoiceItemPayload[];
+}
+
+export interface CreateServicePayload {
+  propertyId: string;
+  name: string;
+  unit: string;
+  price: number;
+  isMetered?: boolean;
+}
+
+export interface UpdateServicePayload {
+  name: string;
+  unit: string;
+  price: number;
+  isMetered?: boolean;
 }
 
 export interface CreateContractPayload {
@@ -168,8 +220,8 @@ export function payInvoice(
   invoiceId: string,
   amount: number,
   userId?: string
-): Promise<ApiResult<unknown>> {
-  return apiRequest<unknown>(`/api/invoices/${invoiceId}/pay`, {
+): Promise<ApiResult<PayInvoiceResult>> {
+  return apiRequest<PayInvoiceResult>(`/api/invoices/${invoiceId}/pay`, {
     method: "POST",
     userId,
     body: {
@@ -221,6 +273,55 @@ export function createContract(
     method: "POST",
     userId,
     body: payload,
+  });
+}
+
+export function getServices(params?: {
+  userId?: string;
+  propertyId?: string;
+}): Promise<ApiResult<OwnerService[]>> {
+  const search = new URLSearchParams();
+
+  if (params?.propertyId) {
+    search.set("propertyId", params.propertyId);
+  }
+
+  const suffix = search.toString() ? `?${search.toString()}` : "";
+  return apiRequest<OwnerService[]>(`/api/services${suffix}`, {
+    userId: params?.userId,
+  });
+}
+
+export function createService(
+  payload: CreateServicePayload,
+  userId?: string
+): Promise<ApiResult<OwnerService>> {
+  return apiRequest<OwnerService>("/api/services", {
+    method: "POST",
+    userId,
+    body: payload,
+  });
+}
+
+export function updateService(
+  serviceId: string,
+  payload: UpdateServicePayload,
+  userId?: string
+): Promise<ApiResult<OwnerService>> {
+  return apiRequest<OwnerService>(`/api/services/${serviceId}`, {
+    method: "PUT",
+    userId,
+    body: payload,
+  });
+}
+
+export function deleteService(
+  serviceId: string,
+  userId?: string
+): Promise<ApiResult<unknown>> {
+  return apiRequest<unknown>(`/api/services/${serviceId}`, {
+    method: "DELETE",
+    userId,
   });
 }
 

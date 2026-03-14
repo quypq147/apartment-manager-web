@@ -35,7 +35,6 @@ function getAvailableRooms(properties: OwnerProperty[]) {
   }
   return available;
 }
-
 export default function TenantsPage() {
   const [contracts, setContracts] = useState<OwnerTenantContract[]>([]);
   const [properties, setProperties] = useState<OwnerProperty[]>([]);

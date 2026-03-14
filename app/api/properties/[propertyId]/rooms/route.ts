@@ -7,6 +7,7 @@ interface CreateRoomBody {
   price: number;
   capacity: number;
   area?: number;
+  serviceIds?: string[];
 }
 
 interface RouteContext {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const body = (await request.json()) as CreateRoomBody;
-    const { name, price, capacity, area } = body;
+    const { name, price, capacity, area, serviceIds } = body;
 
     if (!name?.trim()) {
       return NextResponse.json(
@@ -84,14 +85,102 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const room = await prisma.room.create({
-      data: {
-        name: name.trim(),
-        price,
-        capacity,
-        area: typeof area === "number" ? area : null,
-        propertyId,
-      },
+    const room = await prisma.$transaction(async (tx) => {
+      const createdRoom = await tx.room.create({
+        data: {
+          name: name.trim(),
+          price,
+          capacity,
+          area: typeof area === "number" ? area : null,
+          propertyId,
+        },
+      });
+
+      const normalizedServiceIds = Array.isArray(serviceIds)
+        ? [...new Set(serviceIds.filter((id) => typeof id === "string" && id.trim()))]
+        : [];
+
+      const existingDefaultServices = await tx.service.findMany({
+        where: {
+          propertyId,
+          OR: [
+            { name: { equals: "Điện", mode: "insensitive" } },
+            { name: { equals: "Nước", mode: "insensitive" } },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      const defaultByName = new Map(
+        existingDefaultServices.map((service) => [service.name.toLowerCase(), service.id])
+      );
+
+      const missingDefaults: Array<{
+        name: "Điện" | "Nước";
+        unit: string;
+        price: number;
+        isMetered: boolean;
+      }> = [];
+
+      if (!defaultByName.has("điện")) {
+        missingDefaults.push({ name: "Điện", unit: "kWh", price: 3500, isMetered: true });
+      }
+
+      if (!defaultByName.has("nước")) {
+        missingDefaults.push({ name: "Nước", unit: "m3", price: 25000, isMetered: true });
+      }
+
+      if (missingDefaults.length > 0) {
+        await tx.service.createMany({
+          data: missingDefaults.map((service) => ({
+            propertyId,
+            name: service.name,
+            unit: service.unit,
+            price: service.price,
+            isMetered: service.isMetered,
+          })),
+        });
+      }
+
+      const latestDefaults = await tx.service.findMany({
+        where: {
+          propertyId,
+          OR: [
+            { name: { equals: "Điện", mode: "insensitive" } },
+            { name: { equals: "Nước", mode: "insensitive" } },
+          ],
+        },
+        select: { id: true },
+      });
+
+      const finalServiceIds = Array.from(
+        new Set([...normalizedServiceIds, ...latestDefaults.map((service) => service.id)])
+      );
+
+      if (finalServiceIds.length > 0) {
+        const validServices = await tx.service.findMany({
+          where: {
+            id: { in: finalServiceIds },
+            propertyId,
+          },
+          select: { id: true },
+        });
+
+        if (validServices.length > 0) {
+          await tx.roomService.createMany({
+            data: validServices.map((service) => ({
+              roomId: createdRoom.id,
+              serviceId: service.id,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return createdRoom;
     });
 
     return NextResponse.json(

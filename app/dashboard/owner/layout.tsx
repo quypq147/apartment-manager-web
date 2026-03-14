@@ -7,6 +7,7 @@ import {
   Building, 
   Users, 
   FileText, 
+  Wrench,
   Settings, 
   LogOut,
   Menu
@@ -51,6 +52,12 @@ export default function OwnerLayout({
             Khu trọ & Phòng
           </NavLink>
           <NavLink
+            href="/dashboard/owner/contracts"
+            icon={<FileText className="w-5 h-5" />}
+          >
+            Hợp đồng 
+          </NavLink>
+          <NavLink
             href="/dashboard/owner/tenants"
             icon={<Users className="w-5 h-5" />}
           >
@@ -61,6 +68,12 @@ export default function OwnerLayout({
             icon={<FileText className="w-5 h-5" />}
           >
             Hóa đơn
+          </NavLink>
+          <NavLink
+            href="/dashboard/owner/services"
+            icon={<Wrench className="w-5 h-5" />}
+          >
+            Dịch vụ
           </NavLink>
 
           <div className="mb-4 mt-8 text-xs font-semibold uppercase tracking-wider text-muted-foreground">

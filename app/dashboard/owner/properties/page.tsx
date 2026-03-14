@@ -7,7 +7,9 @@ import {
   createProperty,
   createRoom,
   getProperties,
+  getServices,
   type OwnerProperty,
+  type OwnerService,
 } from "@/lib/api/owner";
 
 const currency = new Intl.NumberFormat("vi-VN");
@@ -21,6 +23,8 @@ export default function PropertiesPage() {
   const [creatingProperty, setCreatingProperty] = useState(false);
   const [activeRoomFormFor, setActiveRoomFormFor] = useState<string | null>(null);
   const [creatingRoom, setCreatingRoom] = useState(false);
+  const [servicesByProperty, setServicesByProperty] = useState<Record<string, OwnerService[]>>({});
+  const [roomServiceSelections, setRoomServiceSelections] = useState<Record<string, string[]>>({});
   const [propertyForm, setPropertyForm] = useState({
     name: "",
     address: "",
@@ -35,15 +39,26 @@ export default function PropertiesPage() {
 
   const loadProperties = async () => {
     setLoading(true);
-    const result = await getProperties();
+    const [propertiesResult, servicesResult] = await Promise.all([getProperties(), getServices()]);
 
-    if (!result.success) {
-      setError(result.error ?? "Không thể tải danh sách khu trọ");
+    if (!propertiesResult.success || !servicesResult.success) {
+      setError(propertiesResult.error ?? servicesResult.error ?? "Không thể tải danh sách khu trọ");
       setLoading(false);
       return;
     }
 
-    setProperties(result.data ?? []);
+    setProperties(propertiesResult.data ?? []);
+    const grouped = (servicesResult.data ?? []).reduce<Record<string, OwnerService[]>>(
+      (accumulator, service) => {
+        if (!accumulator[service.propertyId]) {
+          accumulator[service.propertyId] = [];
+        }
+        accumulator[service.propertyId].push(service);
+        return accumulator;
+      },
+      {}
+    );
+    setServicesByProperty(grouped);
     setError(null);
     setLoading(false);
   };
@@ -52,19 +67,33 @@ export default function PropertiesPage() {
     let cancelled = false;
 
     const loadOnMount = async () => {
-      const result = await getProperties();
+      const [propertiesResult, servicesResult] = await Promise.all([
+        getProperties(),
+        getServices(),
+      ]);
 
       if (cancelled) {
         return;
       }
 
-      if (!result.success) {
-        setError(result.error ?? "Không thể tải danh sách khu trọ");
+      if (!propertiesResult.success || !servicesResult.success) {
+        setError(propertiesResult.error ?? servicesResult.error ?? "Không thể tải danh sách khu trọ");
         setLoading(false);
         return;
       }
 
-      setProperties(result.data ?? []);
+      setProperties(propertiesResult.data ?? []);
+      const grouped = (servicesResult.data ?? []).reduce<Record<string, OwnerService[]>>(
+        (accumulator, service) => {
+          if (!accumulator[service.propertyId]) {
+            accumulator[service.propertyId] = [];
+          }
+          accumulator[service.propertyId].push(service);
+          return accumulator;
+        },
+        {}
+      );
+      setServicesByProperty(grouped);
       setError(null);
       setLoading(false);
     };
@@ -113,6 +142,7 @@ export default function PropertiesPage() {
       price: Number(roomForm.price),
       capacity: Number(roomForm.capacity),
       area: roomForm.area ? Number(roomForm.area) : undefined,
+      serviceIds: roomServiceSelections[propertyId] ?? [],
     });
 
     if (!result.success) {
@@ -122,10 +152,29 @@ export default function PropertiesPage() {
     }
 
     setRoomForm({ name: "", price: "", capacity: "", area: "" });
+    setRoomServiceSelections((prev) => ({ ...prev, [propertyId]: [] }));
     setActiveRoomFormFor(null);
     setActionMessage("Thêm phòng thành công");
     setCreatingRoom(false);
     await loadProperties();
+  };
+
+  const handleToggleRoomService = (propertyId: string, serviceId: string) => {
+    setRoomServiceSelections((prev) => {
+      const selected = prev[propertyId] ?? [];
+
+      if (selected.includes(serviceId)) {
+        return {
+          ...prev,
+          [propertyId]: selected.filter((id) => id !== serviceId),
+        };
+      }
+
+      return {
+        ...prev,
+        [propertyId]: [...selected, serviceId],
+      };
+    });
   };
 
   const totals = useMemo(() => {
@@ -251,6 +300,21 @@ export default function PropertiesPage() {
                     setActiveRoomFormFor((prev) =>
                       prev === property.id ? null : property.id
                     );
+
+                    if (activeRoomFormFor !== property.id) {
+                      const defaultServiceIds = (servicesByProperty[property.id] ?? [])
+                        .filter((service) => {
+                          const normalizedName = service.name.trim().toLowerCase();
+                          return normalizedName === "điện" || normalizedName === "nước";
+                        })
+                        .map((service) => service.id);
+
+                      setRoomServiceSelections((prev) => ({
+                        ...prev,
+                        [property.id]: defaultServiceIds,
+                      }));
+                    }
+
                     setError(null);
                     setActionMessage(null);
                   }}
@@ -314,6 +378,36 @@ export default function PropertiesPage() {
                   >
                     {creatingRoom ? "Đang tạo..." : "Lưu"}
                   </button>
+                </div>
+
+                <div className="md:col-span-4 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+                  <p className="text-sm font-medium text-foreground">Dịch vụ áp dụng cho phòng</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    <label className="inline-flex items-center gap-2 text-foreground">
+                      <input type="checkbox" checked disabled />
+                      Điện (gắn sẵn)
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-foreground">
+                      <input type="checkbox" checked disabled />
+                      Nước (gắn sẵn)
+                    </label>
+
+                    {(servicesByProperty[property.id] ?? [])
+                      .filter((service) => {
+                        const normalizedName = service.name.trim().toLowerCase();
+                        return normalizedName !== "điện" && normalizedName !== "nước";
+                      })
+                      .map((service) => (
+                        <label key={service.id} className="inline-flex items-center gap-2 text-foreground">
+                          <input
+                            type="checkbox"
+                            checked={(roomServiceSelections[property.id] ?? []).includes(service.id)}
+                            onChange={() => handleToggleRoomService(property.id, service.id)}
+                          />
+                          {service.name} ({service.unit})
+                        </label>
+                      ))}
+                  </div>
                 </div>
               </form>
             )}

@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getTenantInvoices, type TenantInvoice } from "@/lib/api/tenant";
-import { FileText, Filter, Download } from "lucide-react";
+import { getTenantInvoices, payTenantInvoice, type TenantInvoice } from "@/lib/api/tenant";
+import { FileText, Filter, Download, CreditCard, CheckCircle2 } from "lucide-react";
 
 function formatDate(input: string | null) {
   if (!input) {
@@ -23,6 +23,8 @@ export default function TenantInvoices() {
   const [invoices, setInvoices] = useState<TenantInvoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processingInvoiceId, setProcessingInvoiceId] = useState<string | null>(null);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +59,52 @@ export default function TenantInvoices() {
     () => (selectedStatus === "all" ? invoices : invoices.filter((inv) => inv.status === selectedStatus)),
     [invoices, selectedStatus]
   );
+
+  const handlePayment = async (invoice: TenantInvoice) => {
+    const remainingAmount = Math.max(invoice.totalAmount - (invoice.paidAmount ?? 0), 0);
+
+    if (remainingAmount <= 0) {
+      return;
+    }
+
+    setPaymentMessage(null);
+    setError(null);
+    setProcessingInvoiceId(invoice.id);
+
+    const result = await payTenantInvoice(
+      invoice.id,
+      remainingAmount,
+      undefined,
+      `TENANT-${invoice.id}-${Date.now()}`
+    );
+
+    if (!result.success || !result.data?.invoice) {
+      setError(result.error ?? "Không thể ghi nhận thanh toán");
+      setProcessingInvoiceId(null);
+      return;
+    }
+
+    setInvoices((currentInvoices) =>
+      currentInvoices.map((currentInvoice) => {
+        if (currentInvoice.id !== result.data?.invoice.id) {
+          return currentInvoice;
+        }
+
+        return {
+          ...currentInvoice,
+          status: result.data.invoice.status,
+          paidAmount: result.data.invoice.paidAmount,
+          paidDate:
+            result.data.payment.paymentDate ??
+            currentInvoice.paidDate ??
+            new Date().toISOString(),
+        };
+      })
+    );
+
+    setProcessingInvoiceId(null);
+    setPaymentMessage(`Thanh toán thành công cho hóa đơn ${invoice.id}.`);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,6 +144,12 @@ export default function TenantInvoices() {
 
       {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {paymentMessage && (
+        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{paymentMessage}</span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -187,9 +241,21 @@ export default function TenantInvoices() {
                       {formatDate(invoice.dueDate)}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Download className="w-5 h-5" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {invoice.status !== "PAID" && (
+                          <button
+                            onClick={() => void handlePayment(invoice)}
+                            disabled={processingInvoiceId === invoice.id}
+                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            {processingInvoiceId === invoice.id ? "Đang xử lý..." : "Thanh toán"}
+                          </button>
+                        )}
+                        <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" aria-label="Tải hóa đơn">
+                          <Download className="w-5 h-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 interface PayInvoiceBody {
   amount: number;
@@ -10,22 +11,26 @@ interface PayInvoiceBody {
 interface RouteContext {
   params: {
     invoiceId: string;
-  };
+  } | Promise<{
+    invoiceId: string;
+  }>;
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role");
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
 
-    if (!userId || userRole !== "LANDLORD") {
+    if (!userId || !userRole || !["LANDLORD", "TENANT"].includes(userRole)) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const { invoiceId } = context.params;
+    const resolvedParams = await Promise.resolve(context.params);
+    const { invoiceId } = resolvedParams;
     if (!invoiceId) {
       return NextResponse.json(
         { success: false, error: "invoiceId is required" },
@@ -51,17 +56,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const invoice = await tx.invoice.findFirst({
-        where: {
-          id: invoiceId,
-          contract: {
-            room: {
-              property: {
-                landlordId: userId,
+      const invoiceWhere =
+        userRole === "LANDLORD"
+          ? {
+              id: invoiceId,
+              contract: {
+                room: {
+                  property: {
+                    landlordId: userId,
+                  },
+                },
               },
-            },
-          },
-        },
+            }
+          : {
+              id: invoiceId,
+              contract: {
+                tenantId: userId,
+              },
+            };
+
+      const invoice = await tx.invoice.findFirst({
+        where: invoiceWhere,
         select: {
           id: true,
           totalAmount: true,

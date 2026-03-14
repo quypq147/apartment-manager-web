@@ -95,6 +95,25 @@ export default function InvoicesPage() {
       return;
     }
 
+    if (result.data?.invoice) {
+      setInvoices((currentInvoices) =>
+        currentInvoices.map((invoice) => {
+          if (invoice.id !== result.data?.invoice.id) {
+            return invoice;
+          }
+
+          return {
+            ...invoice,
+            status: result.data.invoice.status,
+            payments: result.data.invoice.payments.map((payment) => ({
+              id: payment.id,
+              amount: payment.amount,
+            })),
+          };
+        })
+      );
+    }
+
     setMessage("Ghi nhận thu tiền thành công");
     setPayingInvoiceId(null);
     await loadInvoices();
@@ -212,7 +231,6 @@ export default function InvoicesPage() {
               <th className="px-6 py-4 font-medium">Đã thanh toán</th>
               <th className="px-6 py-4 font-medium">Còn nợ</th>
               <th className="px-6 py-4 font-medium">Trạng thái</th>
-              <th className="px-6 py-4 font-medium text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -260,19 +278,6 @@ export default function InvoicesPage() {
                           ? "Đóng thiếu"
                           : "Chưa đóng"}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    {remaining > 0 && (
-                      <button
-                        onClick={() => handlePay(invoice.id, remaining)}
-                        disabled={payingInvoiceId === invoice.id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-60"
-                        title="Ghi nhận thu tiền"
-                      >
-                        <DollarSign className="w-3.5 h-3.5" />
-                        {payingInvoiceId === invoice.id ? "Đang thu..." : "Thu tiền"}
-                      </button>
-                    )}
                   </td>
                 </tr>
               );

@@ -8,6 +8,12 @@ interface RouteContext {
   };
 }
 
+interface AsyncRouteContext {
+  params: Promise<{
+    contractId: string;
+  }>;
+}
+
 interface ExtendContractBody {
   newEndDate: string;
 }
@@ -26,7 +32,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const { contractId } = context.params;
+    const resolvedParams = await Promise.resolve(context.params);
+    const { contractId } = resolvedParams;
     if (!contractId) {
       return NextResponse.json(
         { success: false, error: "contractId is required" },
@@ -167,7 +174,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const { contractId } = context.params;
+    const resolvedParams = await Promise.resolve(context.params);
+    const { contractId } = resolvedParams;
     if (!contractId) {
       return NextResponse.json(
         { success: false, error: "contractId is required" },

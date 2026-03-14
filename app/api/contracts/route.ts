@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { generateNextUserId } from "@/lib/user-id";
+import { generateNextInvoiceId } from "@/lib/invoice-id";
 
 interface CreateContractBody {
   roomId: string;
@@ -173,8 +174,10 @@ export async function POST(request: NextRequest) {
       });
 
       const now = new Date();
+      const invoiceId = await generateNextInvoiceId(tx);
       await tx.invoice.create({
         data: {
+          id: invoiceId,
           title: `Hóa đơn tháng ${now.getMonth() + 1}/${now.getFullYear()} (Tháng đầu + Cọc)`,
           month: now.getMonth() + 1,
           year: now.getFullYear(),
