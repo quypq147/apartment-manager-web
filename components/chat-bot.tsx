@@ -6,11 +6,15 @@ import { useEffect, useRef, useState } from "react";
 import { Bot, MessageCircle, Send, User, X } from "lucide-react";
 
 function getMessageText(message: UIMessage) {
-  return message.parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("\n")
-    .trim();
+  if (message.parts && message.parts.length > 0) {
+    return message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("\n")
+      .trim();
+  }
+
+  return (message as { content?: string }).content ?? "";
 }
 
 export function ChatBot() {

@@ -10,6 +10,7 @@ interface AIOverviewProps {
 export function AIOverview({ stats }: AIOverviewProps) {
   const { completion, complete, isLoading, error } = useCompletion({
     api: "/api/ai/overview",
+    streamProtocol: "text",
   });
 
   if (!stats) return null;

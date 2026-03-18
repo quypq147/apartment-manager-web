@@ -41,7 +41,7 @@ Dữ liệu: ${serializedStats}
     }
 
     const result = await streamText({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-2.0-flash"),
       system:
         "Bạn là trợ lý AI cho ứng dụng quản lý nhà trọ. Luôn trả lời bằng tiếng Việt, ngắn gọn, rõ ràng, không bịa dữ liệu ngoài thông tin được cung cấp.",
       prompt: rolePrompt,
