@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { NotificationsList } from "@/components/notification-card";
+import { AIOverview } from "@/components/dashboard/ai-overview";
 
 function formatDate(input: string | null) {
   if (!input) {
@@ -94,6 +95,18 @@ export default function TenantDashboard() {
     [unpaidInvoices]
   );
 
+  const aiStats = useMemo(() => {
+    const contractStatus = roomInfo ? "ACTIVE" : "NO_ACTIVE_CONTRACT";
+
+    return {
+      roomInfo,
+      contractStatus,
+      unpaidInvoices,
+      totalUnpaidInvoices: unpaidInvoices.length,
+      outstandingAmount,
+    };
+  }, [roomInfo, unpaidInvoices, outstandingAmount]);
+
   const handleConfirmPayment = async () => {
     if (unpaidInvoices.length === 0) {
       setShowQRCode(false);
@@ -142,6 +155,8 @@ export default function TenantDashboard() {
           </p>
         </div>
       </header>
+
+      {!loading && !error && <AIOverview stats={aiStats} />}
 
       {/* Notifications Section */}
       {notifications.length > 0 && (

@@ -170,13 +170,37 @@ export async function POST(request: NextRequest, context: RouteContext) {
         });
 
         if (validServices.length > 0) {
-          await tx.roomService.createMany({
-            data: validServices.map((service) => ({
-              roomId: createdRoom.id,
-              serviceId: service.id,
-            })),
-            skipDuplicates: true,
-          });
+          const roomServiceDelegate = (
+            tx as unknown as {
+              roomService?: {
+                createMany: (args: {
+                  data: Array<{
+                    roomId: string;
+                    serviceId: string;
+                  }>;
+                  skipDuplicates?: boolean;
+                }) => Promise<unknown>;
+              };
+            }
+          ).roomService;
+
+          if (roomServiceDelegate) {
+            await roomServiceDelegate.createMany({
+              data: validServices.map((service) => ({
+                roomId: createdRoom.id,
+                serviceId: service.id,
+              })),
+              skipDuplicates: true,
+            });
+          } else {
+            for (const service of validServices) {
+              await tx.$executeRaw`
+                INSERT INTO "RoomService" ("id", "roomId", "serviceId", "createdAt")
+                VALUES (${`rs_${crypto.randomUUID()}`}, ${createdRoom.id}, ${service.id}, NOW())
+                ON CONFLICT ("roomId", "serviceId") DO NOTHING
+              `;
+            }
+          }
         }
       }
 

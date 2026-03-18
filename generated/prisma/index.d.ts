@@ -34,6 +34,11 @@ export type Room = $Result.DefaultSelection<Prisma.$RoomPayload>
  */
 export type Service = $Result.DefaultSelection<Prisma.$ServicePayload>
 /**
+ * Model RoomService
+ * 
+ */
+export type RoomService = $Result.DefaultSelection<Prisma.$RoomServicePayload>
+/**
  * Model Contract
  * 
  */
@@ -102,6 +107,16 @@ export const PaymentMethod: {
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
+
+export const InvoiceItemType: {
+  ROOM_FEE: 'ROOM_FEE',
+  DEPOSIT: 'DEPOSIT',
+  SERVICE: 'SERVICE',
+  OTHER: 'OTHER'
+};
+
+export type InvoiceItemType = (typeof InvoiceItemType)[keyof typeof InvoiceItemType]
+
 }
 
 export type Role = $Enums.Role
@@ -123,6 +138,10 @@ export const InvoiceStatus: typeof $Enums.InvoiceStatus
 export type PaymentMethod = $Enums.PaymentMethod
 
 export const PaymentMethod: typeof $Enums.PaymentMethod
+
+export type InvoiceItemType = $Enums.InvoiceItemType
+
+export const InvoiceItemType: typeof $Enums.InvoiceItemType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -284,6 +303,16 @@ export class PrismaClient<
     * ```
     */
   get service(): Prisma.ServiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.roomService`: Exposes CRUD operations for the **RoomService** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RoomServices
+    * const roomServices = await prisma.roomService.findMany()
+    * ```
+    */
+  get roomService(): Prisma.RoomServiceDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.contract`: Exposes CRUD operations for the **Contract** model.
@@ -762,6 +791,7 @@ export namespace Prisma {
     Property: 'Property',
     Room: 'Room',
     Service: 'Service',
+    RoomService: 'RoomService',
     Contract: 'Contract',
     Invoice: 'Invoice',
     InvoiceItem: 'InvoiceItem',
@@ -781,7 +811,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "property" | "room" | "service" | "contract" | "invoice" | "invoiceItem" | "payment"
+      modelProps: "user" | "property" | "room" | "service" | "roomService" | "contract" | "invoice" | "invoiceItem" | "payment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1078,6 +1108,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ServiceCountArgs<ExtArgs>
             result: $Utils.Optional<ServiceCountAggregateOutputType> | number
+          }
+        }
+      }
+      RoomService: {
+        payload: Prisma.$RoomServicePayload<ExtArgs>
+        fields: Prisma.RoomServiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RoomServiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RoomServiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          findFirst: {
+            args: Prisma.RoomServiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RoomServiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          findMany: {
+            args: Prisma.RoomServiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>[]
+          }
+          create: {
+            args: Prisma.RoomServiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          createMany: {
+            args: Prisma.RoomServiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RoomServiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>[]
+          }
+          delete: {
+            args: Prisma.RoomServiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          update: {
+            args: Prisma.RoomServiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          deleteMany: {
+            args: Prisma.RoomServiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RoomServiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RoomServiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>[]
+          }
+          upsert: {
+            args: Prisma.RoomServiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomServicePayload>
+          }
+          aggregate: {
+            args: Prisma.RoomServiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRoomService>
+          }
+          groupBy: {
+            args: Prisma.RoomServiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RoomServiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RoomServiceCountArgs<ExtArgs>
+            result: $Utils.Optional<RoomServiceCountAggregateOutputType> | number
           }
         }
       }
@@ -1489,6 +1593,7 @@ export namespace Prisma {
     property?: PropertyOmit
     room?: RoomOmit
     service?: ServiceOmit
+    roomService?: RoomServiceOmit
     contract?: ContractOmit
     invoice?: InvoiceOmit
     invoiceItem?: InvoiceItemOmit
@@ -1654,10 +1759,12 @@ export namespace Prisma {
 
   export type RoomCountOutputType = {
     contracts: number
+    roomServices: number
   }
 
   export type RoomCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     contracts?: boolean | RoomCountOutputTypeCountContractsArgs
+    roomServices?: boolean | RoomCountOutputTypeCountRoomServicesArgs
   }
 
   // Custom InputTypes
@@ -1678,16 +1785,25 @@ export namespace Prisma {
     where?: ContractWhereInput
   }
 
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountRoomServicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomServiceWhereInput
+  }
+
 
   /**
    * Count Type ServiceCountOutputType
    */
 
   export type ServiceCountOutputType = {
+    roomServices: number
     invoiceItems: number
   }
 
   export type ServiceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    roomServices?: boolean | ServiceCountOutputTypeCountRoomServicesArgs
     invoiceItems?: boolean | ServiceCountOutputTypeCountInvoiceItemsArgs
   }
 
@@ -1700,6 +1816,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the ServiceCountOutputType
      */
     select?: ServiceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ServiceCountOutputType without action
+   */
+  export type ServiceCountOutputTypeCountRoomServicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomServiceWhereInput
   }
 
   /**
@@ -4317,6 +4440,7 @@ export namespace Prisma {
     updatedAt?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
     contracts?: boolean | Room$contractsArgs<ExtArgs>
+    roomServices?: boolean | Room$roomServicesArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
 
@@ -4362,6 +4486,7 @@ export namespace Prisma {
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     property?: boolean | PropertyDefaultArgs<ExtArgs>
     contracts?: boolean | Room$contractsArgs<ExtArgs>
+    roomServices?: boolean | Room$roomServicesArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type RoomIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4376,6 +4501,7 @@ export namespace Prisma {
     objects: {
       property: Prisma.$PropertyPayload<ExtArgs>
       contracts: Prisma.$ContractPayload<ExtArgs>[]
+      roomServices: Prisma.$RoomServicePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4783,6 +4909,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     property<T extends PropertyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PropertyDefaultArgs<ExtArgs>>): Prisma__PropertyClient<$Result.GetResult<Prisma.$PropertyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     contracts<T extends Room$contractsArgs<ExtArgs> = {}>(args?: Subset<T, Room$contractsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContractPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    roomServices<T extends Room$roomServicesArgs<ExtArgs> = {}>(args?: Subset<T, Room$roomServicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5241,6 +5368,30 @@ export namespace Prisma {
   }
 
   /**
+   * Room.roomServices
+   */
+  export type Room$roomServicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    where?: RoomServiceWhereInput
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    cursor?: RoomServiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomServiceScalarFieldEnum | RoomServiceScalarFieldEnum[]
+  }
+
+  /**
    * Room without action
    */
   export type RoomDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5466,6 +5617,7 @@ export namespace Prisma {
     isMetered?: boolean
     propertyId?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
+    roomServices?: boolean | Service$roomServicesArgs<ExtArgs>
     invoiceItems?: boolean | Service$invoiceItemsArgs<ExtArgs>
     _count?: boolean | ServiceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["service"]>
@@ -5502,6 +5654,7 @@ export namespace Prisma {
   export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "unit" | "price" | "isMetered" | "propertyId", ExtArgs["result"]["service"]>
   export type ServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     property?: boolean | PropertyDefaultArgs<ExtArgs>
+    roomServices?: boolean | Service$roomServicesArgs<ExtArgs>
     invoiceItems?: boolean | Service$invoiceItemsArgs<ExtArgs>
     _count?: boolean | ServiceCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -5516,6 +5669,7 @@ export namespace Prisma {
     name: "Service"
     objects: {
       property: Prisma.$PropertyPayload<ExtArgs>
+      roomServices: Prisma.$RoomServicePayload<ExtArgs>[]
       invoiceItems: Prisma.$InvoiceItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -5920,6 +6074,7 @@ export namespace Prisma {
   export interface Prisma__ServiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     property<T extends PropertyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PropertyDefaultArgs<ExtArgs>>): Prisma__PropertyClient<$Result.GetResult<Prisma.$PropertyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    roomServices<T extends Service$roomServicesArgs<ExtArgs> = {}>(args?: Subset<T, Service$roomServicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoiceItems<T extends Service$invoiceItemsArgs<ExtArgs> = {}>(args?: Subset<T, Service$invoiceItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoiceItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -6352,6 +6507,30 @@ export namespace Prisma {
   }
 
   /**
+   * Service.roomServices
+   */
+  export type Service$roomServicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    where?: RoomServiceWhereInput
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    cursor?: RoomServiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomServiceScalarFieldEnum | RoomServiceScalarFieldEnum[]
+  }
+
+  /**
    * Service.invoiceItems
    */
   export type Service$invoiceItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6391,6 +6570,1059 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ServiceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RoomService
+   */
+
+  export type AggregateRoomService = {
+    _count: RoomServiceCountAggregateOutputType | null
+    _min: RoomServiceMinAggregateOutputType | null
+    _max: RoomServiceMaxAggregateOutputType | null
+  }
+
+  export type RoomServiceMinAggregateOutputType = {
+    id: string | null
+    roomId: string | null
+    serviceId: string | null
+    createdAt: Date | null
+  }
+
+  export type RoomServiceMaxAggregateOutputType = {
+    id: string | null
+    roomId: string | null
+    serviceId: string | null
+    createdAt: Date | null
+  }
+
+  export type RoomServiceCountAggregateOutputType = {
+    id: number
+    roomId: number
+    serviceId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type RoomServiceMinAggregateInputType = {
+    id?: true
+    roomId?: true
+    serviceId?: true
+    createdAt?: true
+  }
+
+  export type RoomServiceMaxAggregateInputType = {
+    id?: true
+    roomId?: true
+    serviceId?: true
+    createdAt?: true
+  }
+
+  export type RoomServiceCountAggregateInputType = {
+    id?: true
+    roomId?: true
+    serviceId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type RoomServiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoomService to aggregate.
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomServices to fetch.
+     */
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RoomServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RoomServices
+    **/
+    _count?: true | RoomServiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RoomServiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RoomServiceMaxAggregateInputType
+  }
+
+  export type GetRoomServiceAggregateType<T extends RoomServiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateRoomService]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRoomService[P]>
+      : GetScalarType<T[P], AggregateRoomService[P]>
+  }
+
+
+
+
+  export type RoomServiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomServiceWhereInput
+    orderBy?: RoomServiceOrderByWithAggregationInput | RoomServiceOrderByWithAggregationInput[]
+    by: RoomServiceScalarFieldEnum[] | RoomServiceScalarFieldEnum
+    having?: RoomServiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RoomServiceCountAggregateInputType | true
+    _min?: RoomServiceMinAggregateInputType
+    _max?: RoomServiceMaxAggregateInputType
+  }
+
+  export type RoomServiceGroupByOutputType = {
+    id: string
+    roomId: string
+    serviceId: string
+    createdAt: Date
+    _count: RoomServiceCountAggregateOutputType | null
+    _min: RoomServiceMinAggregateOutputType | null
+    _max: RoomServiceMaxAggregateOutputType | null
+  }
+
+  type GetRoomServiceGroupByPayload<T extends RoomServiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RoomServiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RoomServiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RoomServiceGroupByOutputType[P]>
+            : GetScalarType<T[P], RoomServiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RoomServiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roomId?: boolean
+    serviceId?: boolean
+    createdAt?: boolean
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["roomService"]>
+
+  export type RoomServiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roomId?: boolean
+    serviceId?: boolean
+    createdAt?: boolean
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["roomService"]>
+
+  export type RoomServiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roomId?: boolean
+    serviceId?: boolean
+    createdAt?: boolean
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["roomService"]>
+
+  export type RoomServiceSelectScalar = {
+    id?: boolean
+    roomId?: boolean
+    serviceId?: boolean
+    createdAt?: boolean
+  }
+
+  export type RoomServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "serviceId" | "createdAt", ExtArgs["result"]["roomService"]>
+  export type RoomServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+  export type RoomServiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+  export type RoomServiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    room?: boolean | RoomDefaultArgs<ExtArgs>
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+
+  export type $RoomServicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RoomService"
+    objects: {
+      room: Prisma.$RoomPayload<ExtArgs>
+      service: Prisma.$ServicePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      roomId: string
+      serviceId: string
+      createdAt: Date
+    }, ExtArgs["result"]["roomService"]>
+    composites: {}
+  }
+
+  type RoomServiceGetPayload<S extends boolean | null | undefined | RoomServiceDefaultArgs> = $Result.GetResult<Prisma.$RoomServicePayload, S>
+
+  type RoomServiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RoomServiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RoomServiceCountAggregateInputType | true
+    }
+
+  export interface RoomServiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RoomService'], meta: { name: 'RoomService' } }
+    /**
+     * Find zero or one RoomService that matches the filter.
+     * @param {RoomServiceFindUniqueArgs} args - Arguments to find a RoomService
+     * @example
+     * // Get one RoomService
+     * const roomService = await prisma.roomService.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RoomServiceFindUniqueArgs>(args: SelectSubset<T, RoomServiceFindUniqueArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RoomService that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RoomServiceFindUniqueOrThrowArgs} args - Arguments to find a RoomService
+     * @example
+     * // Get one RoomService
+     * const roomService = await prisma.roomService.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RoomServiceFindUniqueOrThrowArgs>(args: SelectSubset<T, RoomServiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoomService that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceFindFirstArgs} args - Arguments to find a RoomService
+     * @example
+     * // Get one RoomService
+     * const roomService = await prisma.roomService.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RoomServiceFindFirstArgs>(args?: SelectSubset<T, RoomServiceFindFirstArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoomService that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceFindFirstOrThrowArgs} args - Arguments to find a RoomService
+     * @example
+     * // Get one RoomService
+     * const roomService = await prisma.roomService.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RoomServiceFindFirstOrThrowArgs>(args?: SelectSubset<T, RoomServiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RoomServices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RoomServices
+     * const roomServices = await prisma.roomService.findMany()
+     * 
+     * // Get first 10 RoomServices
+     * const roomServices = await prisma.roomService.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const roomServiceWithIdOnly = await prisma.roomService.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RoomServiceFindManyArgs>(args?: SelectSubset<T, RoomServiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RoomService.
+     * @param {RoomServiceCreateArgs} args - Arguments to create a RoomService.
+     * @example
+     * // Create one RoomService
+     * const RoomService = await prisma.roomService.create({
+     *   data: {
+     *     // ... data to create a RoomService
+     *   }
+     * })
+     * 
+     */
+    create<T extends RoomServiceCreateArgs>(args: SelectSubset<T, RoomServiceCreateArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RoomServices.
+     * @param {RoomServiceCreateManyArgs} args - Arguments to create many RoomServices.
+     * @example
+     * // Create many RoomServices
+     * const roomService = await prisma.roomService.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RoomServiceCreateManyArgs>(args?: SelectSubset<T, RoomServiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RoomServices and returns the data saved in the database.
+     * @param {RoomServiceCreateManyAndReturnArgs} args - Arguments to create many RoomServices.
+     * @example
+     * // Create many RoomServices
+     * const roomService = await prisma.roomService.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RoomServices and only return the `id`
+     * const roomServiceWithIdOnly = await prisma.roomService.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RoomServiceCreateManyAndReturnArgs>(args?: SelectSubset<T, RoomServiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RoomService.
+     * @param {RoomServiceDeleteArgs} args - Arguments to delete one RoomService.
+     * @example
+     * // Delete one RoomService
+     * const RoomService = await prisma.roomService.delete({
+     *   where: {
+     *     // ... filter to delete one RoomService
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RoomServiceDeleteArgs>(args: SelectSubset<T, RoomServiceDeleteArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RoomService.
+     * @param {RoomServiceUpdateArgs} args - Arguments to update one RoomService.
+     * @example
+     * // Update one RoomService
+     * const roomService = await prisma.roomService.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RoomServiceUpdateArgs>(args: SelectSubset<T, RoomServiceUpdateArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RoomServices.
+     * @param {RoomServiceDeleteManyArgs} args - Arguments to filter RoomServices to delete.
+     * @example
+     * // Delete a few RoomServices
+     * const { count } = await prisma.roomService.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RoomServiceDeleteManyArgs>(args?: SelectSubset<T, RoomServiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoomServices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RoomServices
+     * const roomService = await prisma.roomService.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RoomServiceUpdateManyArgs>(args: SelectSubset<T, RoomServiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoomServices and returns the data updated in the database.
+     * @param {RoomServiceUpdateManyAndReturnArgs} args - Arguments to update many RoomServices.
+     * @example
+     * // Update many RoomServices
+     * const roomService = await prisma.roomService.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RoomServices and only return the `id`
+     * const roomServiceWithIdOnly = await prisma.roomService.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RoomServiceUpdateManyAndReturnArgs>(args: SelectSubset<T, RoomServiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RoomService.
+     * @param {RoomServiceUpsertArgs} args - Arguments to update or create a RoomService.
+     * @example
+     * // Update or create a RoomService
+     * const roomService = await prisma.roomService.upsert({
+     *   create: {
+     *     // ... data to create a RoomService
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RoomService we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RoomServiceUpsertArgs>(args: SelectSubset<T, RoomServiceUpsertArgs<ExtArgs>>): Prisma__RoomServiceClient<$Result.GetResult<Prisma.$RoomServicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RoomServices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceCountArgs} args - Arguments to filter RoomServices to count.
+     * @example
+     * // Count the number of RoomServices
+     * const count = await prisma.roomService.count({
+     *   where: {
+     *     // ... the filter for the RoomServices we want to count
+     *   }
+     * })
+    **/
+    count<T extends RoomServiceCountArgs>(
+      args?: Subset<T, RoomServiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RoomServiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RoomService.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RoomServiceAggregateArgs>(args: Subset<T, RoomServiceAggregateArgs>): Prisma.PrismaPromise<GetRoomServiceAggregateType<T>>
+
+    /**
+     * Group by RoomService.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomServiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RoomServiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RoomServiceGroupByArgs['orderBy'] }
+        : { orderBy?: RoomServiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RoomServiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRoomServiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RoomService model
+   */
+  readonly fields: RoomServiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RoomService.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RoomServiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    room<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    service<T extends ServiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServiceDefaultArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RoomService model
+   */
+  interface RoomServiceFieldRefs {
+    readonly id: FieldRef<"RoomService", 'String'>
+    readonly roomId: FieldRef<"RoomService", 'String'>
+    readonly serviceId: FieldRef<"RoomService", 'String'>
+    readonly createdAt: FieldRef<"RoomService", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RoomService findUnique
+   */
+  export type RoomServiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomService to fetch.
+     */
+    where: RoomServiceWhereUniqueInput
+  }
+
+  /**
+   * RoomService findUniqueOrThrow
+   */
+  export type RoomServiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomService to fetch.
+     */
+    where: RoomServiceWhereUniqueInput
+  }
+
+  /**
+   * RoomService findFirst
+   */
+  export type RoomServiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomService to fetch.
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomServices to fetch.
+     */
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoomServices.
+     */
+    cursor?: RoomServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoomServices.
+     */
+    distinct?: RoomServiceScalarFieldEnum | RoomServiceScalarFieldEnum[]
+  }
+
+  /**
+   * RoomService findFirstOrThrow
+   */
+  export type RoomServiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomService to fetch.
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomServices to fetch.
+     */
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoomServices.
+     */
+    cursor?: RoomServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoomServices.
+     */
+    distinct?: RoomServiceScalarFieldEnum | RoomServiceScalarFieldEnum[]
+  }
+
+  /**
+   * RoomService findMany
+   */
+  export type RoomServiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomServices to fetch.
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomServices to fetch.
+     */
+    orderBy?: RoomServiceOrderByWithRelationInput | RoomServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RoomServices.
+     */
+    cursor?: RoomServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomServices.
+     */
+    skip?: number
+    distinct?: RoomServiceScalarFieldEnum | RoomServiceScalarFieldEnum[]
+  }
+
+  /**
+   * RoomService create
+   */
+  export type RoomServiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RoomService.
+     */
+    data: XOR<RoomServiceCreateInput, RoomServiceUncheckedCreateInput>
+  }
+
+  /**
+   * RoomService createMany
+   */
+  export type RoomServiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RoomServices.
+     */
+    data: RoomServiceCreateManyInput | RoomServiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RoomService createManyAndReturn
+   */
+  export type RoomServiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many RoomServices.
+     */
+    data: RoomServiceCreateManyInput | RoomServiceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoomService update
+   */
+  export type RoomServiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RoomService.
+     */
+    data: XOR<RoomServiceUpdateInput, RoomServiceUncheckedUpdateInput>
+    /**
+     * Choose, which RoomService to update.
+     */
+    where: RoomServiceWhereUniqueInput
+  }
+
+  /**
+   * RoomService updateMany
+   */
+  export type RoomServiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RoomServices.
+     */
+    data: XOR<RoomServiceUpdateManyMutationInput, RoomServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which RoomServices to update
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * Limit how many RoomServices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoomService updateManyAndReturn
+   */
+  export type RoomServiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * The data used to update RoomServices.
+     */
+    data: XOR<RoomServiceUpdateManyMutationInput, RoomServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which RoomServices to update
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * Limit how many RoomServices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoomService upsert
+   */
+  export type RoomServiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RoomService to update in case it exists.
+     */
+    where: RoomServiceWhereUniqueInput
+    /**
+     * In case the RoomService found by the `where` argument doesn't exist, create a new RoomService with this data.
+     */
+    create: XOR<RoomServiceCreateInput, RoomServiceUncheckedCreateInput>
+    /**
+     * In case the RoomService was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RoomServiceUpdateInput, RoomServiceUncheckedUpdateInput>
+  }
+
+  /**
+   * RoomService delete
+   */
+  export type RoomServiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
+    /**
+     * Filter which RoomService to delete.
+     */
+    where: RoomServiceWhereUniqueInput
+  }
+
+  /**
+   * RoomService deleteMany
+   */
+  export type RoomServiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoomServices to delete
+     */
+    where?: RoomServiceWhereInput
+    /**
+     * Limit how many RoomServices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoomService without action
+   */
+  export type RoomServiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomService
+     */
+    select?: RoomServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomService
+     */
+    omit?: RoomServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomServiceInclude<ExtArgs> | null
   }
 
 
@@ -8860,6 +10092,8 @@ export namespace Prisma {
   export type InvoiceItemMinAggregateOutputType = {
     id: string | null
     invoiceId: string | null
+    type: $Enums.InvoiceItemType | null
+    description: string | null
     serviceId: string | null
     oldIndicator: number | null
     newIndicator: number | null
@@ -8871,6 +10105,8 @@ export namespace Prisma {
   export type InvoiceItemMaxAggregateOutputType = {
     id: string | null
     invoiceId: string | null
+    type: $Enums.InvoiceItemType | null
+    description: string | null
     serviceId: string | null
     oldIndicator: number | null
     newIndicator: number | null
@@ -8882,6 +10118,8 @@ export namespace Prisma {
   export type InvoiceItemCountAggregateOutputType = {
     id: number
     invoiceId: number
+    type: number
+    description: number
     serviceId: number
     oldIndicator: number
     newIndicator: number
@@ -8911,6 +10149,8 @@ export namespace Prisma {
   export type InvoiceItemMinAggregateInputType = {
     id?: true
     invoiceId?: true
+    type?: true
+    description?: true
     serviceId?: true
     oldIndicator?: true
     newIndicator?: true
@@ -8922,6 +10162,8 @@ export namespace Prisma {
   export type InvoiceItemMaxAggregateInputType = {
     id?: true
     invoiceId?: true
+    type?: true
+    description?: true
     serviceId?: true
     oldIndicator?: true
     newIndicator?: true
@@ -8933,6 +10175,8 @@ export namespace Prisma {
   export type InvoiceItemCountAggregateInputType = {
     id?: true
     invoiceId?: true
+    type?: true
+    description?: true
     serviceId?: true
     oldIndicator?: true
     newIndicator?: true
@@ -9031,7 +10275,9 @@ export namespace Prisma {
   export type InvoiceItemGroupByOutputType = {
     id: string
     invoiceId: string
-    serviceId: string
+    type: $Enums.InvoiceItemType
+    description: string | null
+    serviceId: string | null
     oldIndicator: number | null
     newIndicator: number | null
     quantity: number
@@ -9061,6 +10307,8 @@ export namespace Prisma {
   export type InvoiceItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     invoiceId?: boolean
+    type?: boolean
+    description?: boolean
     serviceId?: boolean
     oldIndicator?: boolean
     newIndicator?: boolean
@@ -9068,12 +10316,14 @@ export namespace Prisma {
     unitPrice?: boolean
     amount?: boolean
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }, ExtArgs["result"]["invoiceItem"]>
 
   export type InvoiceItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     invoiceId?: boolean
+    type?: boolean
+    description?: boolean
     serviceId?: boolean
     oldIndicator?: boolean
     newIndicator?: boolean
@@ -9081,12 +10331,14 @@ export namespace Prisma {
     unitPrice?: boolean
     amount?: boolean
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }, ExtArgs["result"]["invoiceItem"]>
 
   export type InvoiceItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     invoiceId?: boolean
+    type?: boolean
+    description?: boolean
     serviceId?: boolean
     oldIndicator?: boolean
     newIndicator?: boolean
@@ -9094,12 +10346,14 @@ export namespace Prisma {
     unitPrice?: boolean
     amount?: boolean
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }, ExtArgs["result"]["invoiceItem"]>
 
   export type InvoiceItemSelectScalar = {
     id?: boolean
     invoiceId?: boolean
+    type?: boolean
+    description?: boolean
     serviceId?: boolean
     oldIndicator?: boolean
     newIndicator?: boolean
@@ -9108,30 +10362,32 @@ export namespace Prisma {
     amount?: boolean
   }
 
-  export type InvoiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceId" | "serviceId" | "oldIndicator" | "newIndicator" | "quantity" | "unitPrice" | "amount", ExtArgs["result"]["invoiceItem"]>
+  export type InvoiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceId" | "type" | "description" | "serviceId" | "oldIndicator" | "newIndicator" | "quantity" | "unitPrice" | "amount", ExtArgs["result"]["invoiceItem"]>
   export type InvoiceItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }
   export type InvoiceItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }
   export type InvoiceItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
-    service?: boolean | ServiceDefaultArgs<ExtArgs>
+    service?: boolean | InvoiceItem$serviceArgs<ExtArgs>
   }
 
   export type $InvoiceItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "InvoiceItem"
     objects: {
       invoice: Prisma.$InvoicePayload<ExtArgs>
-      service: Prisma.$ServicePayload<ExtArgs>
+      service: Prisma.$ServicePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       invoiceId: string
-      serviceId: string
+      type: $Enums.InvoiceItemType
+      description: string | null
+      serviceId: string | null
       oldIndicator: number | null
       newIndicator: number | null
       quantity: number
@@ -9532,7 +10788,7 @@ export namespace Prisma {
   export interface Prisma__InvoiceItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     invoice<T extends InvoiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InvoiceDefaultArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    service<T extends ServiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServiceDefaultArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    service<T extends InvoiceItem$serviceArgs<ExtArgs> = {}>(args?: Subset<T, InvoiceItem$serviceArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9564,6 +10820,8 @@ export namespace Prisma {
   interface InvoiceItemFieldRefs {
     readonly id: FieldRef<"InvoiceItem", 'String'>
     readonly invoiceId: FieldRef<"InvoiceItem", 'String'>
+    readonly type: FieldRef<"InvoiceItem", 'InvoiceItemType'>
+    readonly description: FieldRef<"InvoiceItem", 'String'>
     readonly serviceId: FieldRef<"InvoiceItem", 'String'>
     readonly oldIndicator: FieldRef<"InvoiceItem", 'Float'>
     readonly newIndicator: FieldRef<"InvoiceItem", 'Float'>
@@ -9963,6 +11221,25 @@ export namespace Prisma {
      * Limit how many InvoiceItems to delete.
      */
     limit?: number
+  }
+
+  /**
+   * InvoiceItem.service
+   */
+  export type InvoiceItem$serviceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    where?: ServiceWhereInput
   }
 
   /**
@@ -11158,6 +12435,16 @@ export namespace Prisma {
   export type ServiceScalarFieldEnum = (typeof ServiceScalarFieldEnum)[keyof typeof ServiceScalarFieldEnum]
 
 
+  export const RoomServiceScalarFieldEnum: {
+    id: 'id',
+    roomId: 'roomId',
+    serviceId: 'serviceId',
+    createdAt: 'createdAt'
+  };
+
+  export type RoomServiceScalarFieldEnum = (typeof RoomServiceScalarFieldEnum)[keyof typeof RoomServiceScalarFieldEnum]
+
+
   export const ContractScalarFieldEnum: {
     id: 'id',
     deposit: 'deposit',
@@ -11194,6 +12481,8 @@ export namespace Prisma {
   export const InvoiceItemScalarFieldEnum: {
     id: 'id',
     invoiceId: 'invoiceId',
+    type: 'type',
+    description: 'description',
     serviceId: 'serviceId',
     oldIndicator: 'oldIndicator',
     newIndicator: 'newIndicator',
@@ -11362,6 +12651,20 @@ export namespace Prisma {
    * Reference to a field of type 'InvoiceStatus[]'
    */
   export type ListEnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'InvoiceItemType'
+   */
+  export type EnumInvoiceItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceItemType'>
+    
+
+
+  /**
+   * Reference to a field of type 'InvoiceItemType[]'
+   */
+  export type ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceItemType[]'>
     
 
 
@@ -11546,6 +12849,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     property?: XOR<PropertyScalarRelationFilter, PropertyWhereInput>
     contracts?: ContractListRelationFilter
+    roomServices?: RoomServiceListRelationFilter
   }
 
   export type RoomOrderByWithRelationInput = {
@@ -11560,6 +12864,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     property?: PropertyOrderByWithRelationInput
     contracts?: ContractOrderByRelationAggregateInput
+    roomServices?: RoomServiceOrderByRelationAggregateInput
   }
 
   export type RoomWhereUniqueInput = Prisma.AtLeast<{
@@ -11577,6 +12882,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     property?: XOR<PropertyScalarRelationFilter, PropertyWhereInput>
     contracts?: ContractListRelationFilter
+    roomServices?: RoomServiceListRelationFilter
   }, "id">
 
   export type RoomOrderByWithAggregationInput = {
@@ -11622,6 +12928,7 @@ export namespace Prisma {
     isMetered?: BoolFilter<"Service"> | boolean
     propertyId?: StringFilter<"Service"> | string
     property?: XOR<PropertyScalarRelationFilter, PropertyWhereInput>
+    roomServices?: RoomServiceListRelationFilter
     invoiceItems?: InvoiceItemListRelationFilter
   }
 
@@ -11633,6 +12940,7 @@ export namespace Prisma {
     isMetered?: SortOrder
     propertyId?: SortOrder
     property?: PropertyOrderByWithRelationInput
+    roomServices?: RoomServiceOrderByRelationAggregateInput
     invoiceItems?: InvoiceItemOrderByRelationAggregateInput
   }
 
@@ -11647,6 +12955,7 @@ export namespace Prisma {
     isMetered?: BoolFilter<"Service"> | boolean
     propertyId?: StringFilter<"Service"> | string
     property?: XOR<PropertyScalarRelationFilter, PropertyWhereInput>
+    roomServices?: RoomServiceListRelationFilter
     invoiceItems?: InvoiceItemListRelationFilter
   }, "id">
 
@@ -11674,6 +12983,60 @@ export namespace Prisma {
     price?: FloatWithAggregatesFilter<"Service"> | number
     isMetered?: BoolWithAggregatesFilter<"Service"> | boolean
     propertyId?: StringWithAggregatesFilter<"Service"> | string
+  }
+
+  export type RoomServiceWhereInput = {
+    AND?: RoomServiceWhereInput | RoomServiceWhereInput[]
+    OR?: RoomServiceWhereInput[]
+    NOT?: RoomServiceWhereInput | RoomServiceWhereInput[]
+    id?: StringFilter<"RoomService"> | string
+    roomId?: StringFilter<"RoomService"> | string
+    serviceId?: StringFilter<"RoomService"> | string
+    createdAt?: DateTimeFilter<"RoomService"> | Date | string
+    room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+  }
+
+  export type RoomServiceOrderByWithRelationInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    serviceId?: SortOrder
+    createdAt?: SortOrder
+    room?: RoomOrderByWithRelationInput
+    service?: ServiceOrderByWithRelationInput
+  }
+
+  export type RoomServiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    roomId_serviceId?: RoomServiceRoomIdServiceIdCompoundUniqueInput
+    AND?: RoomServiceWhereInput | RoomServiceWhereInput[]
+    OR?: RoomServiceWhereInput[]
+    NOT?: RoomServiceWhereInput | RoomServiceWhereInput[]
+    roomId?: StringFilter<"RoomService"> | string
+    serviceId?: StringFilter<"RoomService"> | string
+    createdAt?: DateTimeFilter<"RoomService"> | Date | string
+    room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+  }, "id" | "roomId_serviceId">
+
+  export type RoomServiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    serviceId?: SortOrder
+    createdAt?: SortOrder
+    _count?: RoomServiceCountOrderByAggregateInput
+    _max?: RoomServiceMaxOrderByAggregateInput
+    _min?: RoomServiceMinOrderByAggregateInput
+  }
+
+  export type RoomServiceScalarWhereWithAggregatesInput = {
+    AND?: RoomServiceScalarWhereWithAggregatesInput | RoomServiceScalarWhereWithAggregatesInput[]
+    OR?: RoomServiceScalarWhereWithAggregatesInput[]
+    NOT?: RoomServiceScalarWhereWithAggregatesInput | RoomServiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RoomService"> | string
+    roomId?: StringWithAggregatesFilter<"RoomService"> | string
+    serviceId?: StringWithAggregatesFilter<"RoomService"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"RoomService"> | Date | string
   }
 
   export type ContractWhereInput = {
@@ -11863,20 +13226,24 @@ export namespace Prisma {
     NOT?: InvoiceItemWhereInput | InvoiceItemWhereInput[]
     id?: StringFilter<"InvoiceItem"> | string
     invoiceId?: StringFilter<"InvoiceItem"> | string
-    serviceId?: StringFilter<"InvoiceItem"> | string
+    type?: EnumInvoiceItemTypeFilter<"InvoiceItem"> | $Enums.InvoiceItemType
+    description?: StringNullableFilter<"InvoiceItem"> | string | null
+    serviceId?: StringNullableFilter<"InvoiceItem"> | string | null
     oldIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     newIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     quantity?: FloatFilter<"InvoiceItem"> | number
     unitPrice?: FloatFilter<"InvoiceItem"> | number
     amount?: FloatFilter<"InvoiceItem"> | number
     invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
-    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+    service?: XOR<ServiceNullableScalarRelationFilter, ServiceWhereInput> | null
   }
 
   export type InvoiceItemOrderByWithRelationInput = {
     id?: SortOrder
     invoiceId?: SortOrder
-    serviceId?: SortOrder
+    type?: SortOrder
+    description?: SortOrderInput | SortOrder
+    serviceId?: SortOrderInput | SortOrder
     oldIndicator?: SortOrderInput | SortOrder
     newIndicator?: SortOrderInput | SortOrder
     quantity?: SortOrder
@@ -11892,20 +13259,24 @@ export namespace Prisma {
     OR?: InvoiceItemWhereInput[]
     NOT?: InvoiceItemWhereInput | InvoiceItemWhereInput[]
     invoiceId?: StringFilter<"InvoiceItem"> | string
-    serviceId?: StringFilter<"InvoiceItem"> | string
+    type?: EnumInvoiceItemTypeFilter<"InvoiceItem"> | $Enums.InvoiceItemType
+    description?: StringNullableFilter<"InvoiceItem"> | string | null
+    serviceId?: StringNullableFilter<"InvoiceItem"> | string | null
     oldIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     newIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     quantity?: FloatFilter<"InvoiceItem"> | number
     unitPrice?: FloatFilter<"InvoiceItem"> | number
     amount?: FloatFilter<"InvoiceItem"> | number
     invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
-    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+    service?: XOR<ServiceNullableScalarRelationFilter, ServiceWhereInput> | null
   }, "id">
 
   export type InvoiceItemOrderByWithAggregationInput = {
     id?: SortOrder
     invoiceId?: SortOrder
-    serviceId?: SortOrder
+    type?: SortOrder
+    description?: SortOrderInput | SortOrder
+    serviceId?: SortOrderInput | SortOrder
     oldIndicator?: SortOrderInput | SortOrder
     newIndicator?: SortOrderInput | SortOrder
     quantity?: SortOrder
@@ -11924,7 +13295,9 @@ export namespace Prisma {
     NOT?: InvoiceItemScalarWhereWithAggregatesInput | InvoiceItemScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"InvoiceItem"> | string
     invoiceId?: StringWithAggregatesFilter<"InvoiceItem"> | string
-    serviceId?: StringWithAggregatesFilter<"InvoiceItem"> | string
+    type?: EnumInvoiceItemTypeWithAggregatesFilter<"InvoiceItem"> | $Enums.InvoiceItemType
+    description?: StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+    serviceId?: StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
     oldIndicator?: FloatNullableWithAggregatesFilter<"InvoiceItem"> | number | null
     newIndicator?: FloatNullableWithAggregatesFilter<"InvoiceItem"> | number | null
     quantity?: FloatWithAggregatesFilter<"InvoiceItem"> | number
@@ -12174,6 +13547,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     property: PropertyCreateNestedOneWithoutRoomsInput
     contracts?: ContractCreateNestedManyWithoutRoomInput
+    roomServices?: RoomServiceCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateInput = {
@@ -12187,6 +13561,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     contracts?: ContractUncheckedCreateNestedManyWithoutRoomInput
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUpdateInput = {
@@ -12200,6 +13575,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     property?: PropertyUpdateOneRequiredWithoutRoomsNestedInput
     contracts?: ContractUpdateManyWithoutRoomNestedInput
+    roomServices?: RoomServiceUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateInput = {
@@ -12213,6 +13589,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contracts?: ContractUncheckedUpdateManyWithoutRoomNestedInput
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomCreateManyInput = {
@@ -12257,6 +13634,7 @@ export namespace Prisma {
     price: number
     isMetered?: boolean
     property: PropertyCreateNestedOneWithoutServicesInput
+    roomServices?: RoomServiceCreateNestedManyWithoutServiceInput
     invoiceItems?: InvoiceItemCreateNestedManyWithoutServiceInput
   }
 
@@ -12267,6 +13645,7 @@ export namespace Prisma {
     price: number
     isMetered?: boolean
     propertyId: string
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutServiceInput
     invoiceItems?: InvoiceItemUncheckedCreateNestedManyWithoutServiceInput
   }
 
@@ -12277,6 +13656,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
     property?: PropertyUpdateOneRequiredWithoutServicesNestedInput
+    roomServices?: RoomServiceUpdateManyWithoutServiceNestedInput
     invoiceItems?: InvoiceItemUpdateManyWithoutServiceNestedInput
   }
 
@@ -12287,6 +13667,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
     propertyId?: StringFieldUpdateOperationsInput | string
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutServiceNestedInput
     invoiceItems?: InvoiceItemUncheckedUpdateManyWithoutServiceNestedInput
   }
 
@@ -12314,6 +13695,53 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
     propertyId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type RoomServiceCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    room: RoomCreateNestedOneWithoutRoomServicesInput
+    service: ServiceCreateNestedOneWithoutRoomServicesInput
+  }
+
+  export type RoomServiceUncheckedCreateInput = {
+    id?: string
+    roomId: string
+    serviceId: string
+    createdAt?: Date | string
+  }
+
+  export type RoomServiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    room?: RoomUpdateOneRequiredWithoutRoomServicesNestedInput
+    service?: ServiceUpdateOneRequiredWithoutRoomServicesNestedInput
+  }
+
+  export type RoomServiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    serviceId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomServiceCreateManyInput = {
+    id?: string
+    roomId: string
+    serviceId: string
+    createdAt?: Date | string
+  }
+
+  export type RoomServiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomServiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    serviceId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ContractCreateInput = {
@@ -12516,19 +13944,23 @@ export namespace Prisma {
 
   export type InvoiceItemCreateInput = {
     id?: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
     unitPrice: number
     amount: number
     invoice: InvoiceCreateNestedOneWithoutItemsInput
-    service: ServiceCreateNestedOneWithoutInvoiceItemsInput
+    service?: ServiceCreateNestedOneWithoutInvoiceItemsInput
   }
 
   export type InvoiceItemUncheckedCreateInput = {
     id?: string
     invoiceId: string
-    serviceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
+    serviceId?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -12538,19 +13970,23 @@ export namespace Prisma {
 
   export type InvoiceItemUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
     unitPrice?: FloatFieldUpdateOperationsInput | number
     amount?: FloatFieldUpdateOperationsInput | number
     invoice?: InvoiceUpdateOneRequiredWithoutItemsNestedInput
-    service?: ServiceUpdateOneRequiredWithoutInvoiceItemsNestedInput
+    service?: ServiceUpdateOneWithoutInvoiceItemsNestedInput
   }
 
   export type InvoiceItemUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     invoiceId?: StringFieldUpdateOperationsInput | string
-    serviceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -12561,7 +13997,9 @@ export namespace Prisma {
   export type InvoiceItemCreateManyInput = {
     id?: string
     invoiceId: string
-    serviceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
+    serviceId?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -12571,6 +14009,8 @@ export namespace Prisma {
 
   export type InvoiceItemUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -12581,7 +14021,9 @@ export namespace Prisma {
   export type InvoiceItemUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     invoiceId?: StringFieldUpdateOperationsInput | string
-    serviceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -12920,6 +14362,16 @@ export namespace Prisma {
     isNot?: PropertyWhereInput
   }
 
+  export type RoomServiceListRelationFilter = {
+    every?: RoomServiceWhereInput
+    some?: RoomServiceWhereInput
+    none?: RoomServiceWhereInput
+  }
+
+  export type RoomServiceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type RoomCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -13084,6 +14536,42 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type RoomScalarRelationFilter = {
+    is?: RoomWhereInput
+    isNot?: RoomWhereInput
+  }
+
+  export type ServiceScalarRelationFilter = {
+    is?: ServiceWhereInput
+    isNot?: ServiceWhereInput
+  }
+
+  export type RoomServiceRoomIdServiceIdCompoundUniqueInput = {
+    roomId: string
+    serviceId: string
+  }
+
+  export type RoomServiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    serviceId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RoomServiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    serviceId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RoomServiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    serviceId?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -13100,11 +14588,6 @@ export namespace Prisma {
     in?: $Enums.ContractStatus[] | ListEnumContractStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.ContractStatus[] | ListEnumContractStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumContractStatusFilter<$PrismaModel> | $Enums.ContractStatus
-  }
-
-  export type RoomScalarRelationFilter = {
-    is?: RoomWhereInput
-    isNot?: RoomWhereInput
   }
 
   export type InvoiceListRelationFilter = {
@@ -13276,19 +14759,28 @@ export namespace Prisma {
     _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
   }
 
+  export type EnumInvoiceItemTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceItemType | EnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceItemTypeFilter<$PrismaModel> | $Enums.InvoiceItemType
+  }
+
   export type InvoiceScalarRelationFilter = {
     is?: InvoiceWhereInput
     isNot?: InvoiceWhereInput
   }
 
-  export type ServiceScalarRelationFilter = {
-    is?: ServiceWhereInput
-    isNot?: ServiceWhereInput
+  export type ServiceNullableScalarRelationFilter = {
+    is?: ServiceWhereInput | null
+    isNot?: ServiceWhereInput | null
   }
 
   export type InvoiceItemCountOrderByAggregateInput = {
     id?: SortOrder
     invoiceId?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
     serviceId?: SortOrder
     oldIndicator?: SortOrder
     newIndicator?: SortOrder
@@ -13308,6 +14800,8 @@ export namespace Prisma {
   export type InvoiceItemMaxOrderByAggregateInput = {
     id?: SortOrder
     invoiceId?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
     serviceId?: SortOrder
     oldIndicator?: SortOrder
     newIndicator?: SortOrder
@@ -13319,6 +14813,8 @@ export namespace Prisma {
   export type InvoiceItemMinOrderByAggregateInput = {
     id?: SortOrder
     invoiceId?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
     serviceId?: SortOrder
     oldIndicator?: SortOrder
     newIndicator?: SortOrder
@@ -13333,6 +14829,16 @@ export namespace Prisma {
     quantity?: SortOrder
     unitPrice?: SortOrder
     amount?: SortOrder
+  }
+
+  export type EnumInvoiceItemTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceItemType | EnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceItemTypeWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceItemType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceItemTypeFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceItemTypeFilter<$PrismaModel>
   }
 
   export type EnumPaymentMethodFilter<$PrismaModel = never> = {
@@ -13598,11 +15104,25 @@ export namespace Prisma {
     connect?: ContractWhereUniqueInput | ContractWhereUniqueInput[]
   }
 
+  export type RoomServiceCreateNestedManyWithoutRoomInput = {
+    create?: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput> | RoomServiceCreateWithoutRoomInput[] | RoomServiceUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutRoomInput | RoomServiceCreateOrConnectWithoutRoomInput[]
+    createMany?: RoomServiceCreateManyRoomInputEnvelope
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+  }
+
   export type ContractUncheckedCreateNestedManyWithoutRoomInput = {
     create?: XOR<ContractCreateWithoutRoomInput, ContractUncheckedCreateWithoutRoomInput> | ContractCreateWithoutRoomInput[] | ContractUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: ContractCreateOrConnectWithoutRoomInput | ContractCreateOrConnectWithoutRoomInput[]
     createMany?: ContractCreateManyRoomInputEnvelope
     connect?: ContractWhereUniqueInput | ContractWhereUniqueInput[]
+  }
+
+  export type RoomServiceUncheckedCreateNestedManyWithoutRoomInput = {
+    create?: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput> | RoomServiceCreateWithoutRoomInput[] | RoomServiceUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutRoomInput | RoomServiceCreateOrConnectWithoutRoomInput[]
+    createMany?: RoomServiceCreateManyRoomInputEnvelope
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -13655,6 +15175,20 @@ export namespace Prisma {
     deleteMany?: ContractScalarWhereInput | ContractScalarWhereInput[]
   }
 
+  export type RoomServiceUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput> | RoomServiceCreateWithoutRoomInput[] | RoomServiceUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutRoomInput | RoomServiceCreateOrConnectWithoutRoomInput[]
+    upsert?: RoomServiceUpsertWithWhereUniqueWithoutRoomInput | RoomServiceUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: RoomServiceCreateManyRoomInputEnvelope
+    set?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    disconnect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    delete?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    update?: RoomServiceUpdateWithWhereUniqueWithoutRoomInput | RoomServiceUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: RoomServiceUpdateManyWithWhereWithoutRoomInput | RoomServiceUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+  }
+
   export type ContractUncheckedUpdateManyWithoutRoomNestedInput = {
     create?: XOR<ContractCreateWithoutRoomInput, ContractUncheckedCreateWithoutRoomInput> | ContractCreateWithoutRoomInput[] | ContractUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: ContractCreateOrConnectWithoutRoomInput | ContractCreateOrConnectWithoutRoomInput[]
@@ -13669,10 +15203,31 @@ export namespace Prisma {
     deleteMany?: ContractScalarWhereInput | ContractScalarWhereInput[]
   }
 
+  export type RoomServiceUncheckedUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput> | RoomServiceCreateWithoutRoomInput[] | RoomServiceUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutRoomInput | RoomServiceCreateOrConnectWithoutRoomInput[]
+    upsert?: RoomServiceUpsertWithWhereUniqueWithoutRoomInput | RoomServiceUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: RoomServiceCreateManyRoomInputEnvelope
+    set?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    disconnect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    delete?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    update?: RoomServiceUpdateWithWhereUniqueWithoutRoomInput | RoomServiceUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: RoomServiceUpdateManyWithWhereWithoutRoomInput | RoomServiceUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+  }
+
   export type PropertyCreateNestedOneWithoutServicesInput = {
     create?: XOR<PropertyCreateWithoutServicesInput, PropertyUncheckedCreateWithoutServicesInput>
     connectOrCreate?: PropertyCreateOrConnectWithoutServicesInput
     connect?: PropertyWhereUniqueInput
+  }
+
+  export type RoomServiceCreateNestedManyWithoutServiceInput = {
+    create?: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput> | RoomServiceCreateWithoutServiceInput[] | RoomServiceUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutServiceInput | RoomServiceCreateOrConnectWithoutServiceInput[]
+    createMany?: RoomServiceCreateManyServiceInputEnvelope
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
   }
 
   export type InvoiceItemCreateNestedManyWithoutServiceInput = {
@@ -13680,6 +15235,13 @@ export namespace Prisma {
     connectOrCreate?: InvoiceItemCreateOrConnectWithoutServiceInput | InvoiceItemCreateOrConnectWithoutServiceInput[]
     createMany?: InvoiceItemCreateManyServiceInputEnvelope
     connect?: InvoiceItemWhereUniqueInput | InvoiceItemWhereUniqueInput[]
+  }
+
+  export type RoomServiceUncheckedCreateNestedManyWithoutServiceInput = {
+    create?: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput> | RoomServiceCreateWithoutServiceInput[] | RoomServiceUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutServiceInput | RoomServiceCreateOrConnectWithoutServiceInput[]
+    createMany?: RoomServiceCreateManyServiceInputEnvelope
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
   }
 
   export type InvoiceItemUncheckedCreateNestedManyWithoutServiceInput = {
@@ -13701,6 +15263,20 @@ export namespace Prisma {
     update?: XOR<XOR<PropertyUpdateToOneWithWhereWithoutServicesInput, PropertyUpdateWithoutServicesInput>, PropertyUncheckedUpdateWithoutServicesInput>
   }
 
+  export type RoomServiceUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput> | RoomServiceCreateWithoutServiceInput[] | RoomServiceUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutServiceInput | RoomServiceCreateOrConnectWithoutServiceInput[]
+    upsert?: RoomServiceUpsertWithWhereUniqueWithoutServiceInput | RoomServiceUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: RoomServiceCreateManyServiceInputEnvelope
+    set?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    disconnect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    delete?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    update?: RoomServiceUpdateWithWhereUniqueWithoutServiceInput | RoomServiceUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: RoomServiceUpdateManyWithWhereWithoutServiceInput | RoomServiceUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+  }
+
   export type InvoiceItemUpdateManyWithoutServiceNestedInput = {
     create?: XOR<InvoiceItemCreateWithoutServiceInput, InvoiceItemUncheckedCreateWithoutServiceInput> | InvoiceItemCreateWithoutServiceInput[] | InvoiceItemUncheckedCreateWithoutServiceInput[]
     connectOrCreate?: InvoiceItemCreateOrConnectWithoutServiceInput | InvoiceItemCreateOrConnectWithoutServiceInput[]
@@ -13715,6 +15291,20 @@ export namespace Prisma {
     deleteMany?: InvoiceItemScalarWhereInput | InvoiceItemScalarWhereInput[]
   }
 
+  export type RoomServiceUncheckedUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput> | RoomServiceCreateWithoutServiceInput[] | RoomServiceUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: RoomServiceCreateOrConnectWithoutServiceInput | RoomServiceCreateOrConnectWithoutServiceInput[]
+    upsert?: RoomServiceUpsertWithWhereUniqueWithoutServiceInput | RoomServiceUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: RoomServiceCreateManyServiceInputEnvelope
+    set?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    disconnect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    delete?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    connect?: RoomServiceWhereUniqueInput | RoomServiceWhereUniqueInput[]
+    update?: RoomServiceUpdateWithWhereUniqueWithoutServiceInput | RoomServiceUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: RoomServiceUpdateManyWithWhereWithoutServiceInput | RoomServiceUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+  }
+
   export type InvoiceItemUncheckedUpdateManyWithoutServiceNestedInput = {
     create?: XOR<InvoiceItemCreateWithoutServiceInput, InvoiceItemUncheckedCreateWithoutServiceInput> | InvoiceItemCreateWithoutServiceInput[] | InvoiceItemUncheckedCreateWithoutServiceInput[]
     connectOrCreate?: InvoiceItemCreateOrConnectWithoutServiceInput | InvoiceItemCreateOrConnectWithoutServiceInput[]
@@ -13727,6 +15317,34 @@ export namespace Prisma {
     update?: InvoiceItemUpdateWithWhereUniqueWithoutServiceInput | InvoiceItemUpdateWithWhereUniqueWithoutServiceInput[]
     updateMany?: InvoiceItemUpdateManyWithWhereWithoutServiceInput | InvoiceItemUpdateManyWithWhereWithoutServiceInput[]
     deleteMany?: InvoiceItemScalarWhereInput | InvoiceItemScalarWhereInput[]
+  }
+
+  export type RoomCreateNestedOneWithoutRoomServicesInput = {
+    create?: XOR<RoomCreateWithoutRoomServicesInput, RoomUncheckedCreateWithoutRoomServicesInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutRoomServicesInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type ServiceCreateNestedOneWithoutRoomServicesInput = {
+    create?: XOR<ServiceCreateWithoutRoomServicesInput, ServiceUncheckedCreateWithoutRoomServicesInput>
+    connectOrCreate?: ServiceCreateOrConnectWithoutRoomServicesInput
+    connect?: ServiceWhereUniqueInput
+  }
+
+  export type RoomUpdateOneRequiredWithoutRoomServicesNestedInput = {
+    create?: XOR<RoomCreateWithoutRoomServicesInput, RoomUncheckedCreateWithoutRoomServicesInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutRoomServicesInput
+    upsert?: RoomUpsertWithoutRoomServicesInput
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutRoomServicesInput, RoomUpdateWithoutRoomServicesInput>, RoomUncheckedUpdateWithoutRoomServicesInput>
+  }
+
+  export type ServiceUpdateOneRequiredWithoutRoomServicesNestedInput = {
+    create?: XOR<ServiceCreateWithoutRoomServicesInput, ServiceUncheckedCreateWithoutRoomServicesInput>
+    connectOrCreate?: ServiceCreateOrConnectWithoutRoomServicesInput
+    upsert?: ServiceUpsertWithoutRoomServicesInput
+    connect?: ServiceWhereUniqueInput
+    update?: XOR<XOR<ServiceUpdateToOneWithWhereWithoutRoomServicesInput, ServiceUpdateWithoutRoomServicesInput>, ServiceUncheckedUpdateWithoutRoomServicesInput>
   }
 
   export type RoomCreateNestedOneWithoutContractsInput = {
@@ -13921,6 +15539,10 @@ export namespace Prisma {
     connect?: ServiceWhereUniqueInput
   }
 
+  export type EnumInvoiceItemTypeFieldUpdateOperationsInput = {
+    set?: $Enums.InvoiceItemType
+  }
+
   export type InvoiceUpdateOneRequiredWithoutItemsNestedInput = {
     create?: XOR<InvoiceCreateWithoutItemsInput, InvoiceUncheckedCreateWithoutItemsInput>
     connectOrCreate?: InvoiceCreateOrConnectWithoutItemsInput
@@ -13929,10 +15551,12 @@ export namespace Prisma {
     update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutItemsInput, InvoiceUpdateWithoutItemsInput>, InvoiceUncheckedUpdateWithoutItemsInput>
   }
 
-  export type ServiceUpdateOneRequiredWithoutInvoiceItemsNestedInput = {
+  export type ServiceUpdateOneWithoutInvoiceItemsNestedInput = {
     create?: XOR<ServiceCreateWithoutInvoiceItemsInput, ServiceUncheckedCreateWithoutInvoiceItemsInput>
     connectOrCreate?: ServiceCreateOrConnectWithoutInvoiceItemsInput
     upsert?: ServiceUpsertWithoutInvoiceItemsInput
+    disconnect?: ServiceWhereInput | boolean
+    delete?: ServiceWhereInput | boolean
     connect?: ServiceWhereUniqueInput
     update?: XOR<XOR<ServiceUpdateToOneWithWhereWithoutInvoiceItemsInput, ServiceUpdateWithoutInvoiceItemsInput>, ServiceUncheckedUpdateWithoutInvoiceItemsInput>
   }
@@ -14240,6 +15864,23 @@ export namespace Prisma {
     _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumInvoiceItemTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceItemType | EnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceItemTypeFilter<$PrismaModel> | $Enums.InvoiceItemType
+  }
+
+  export type NestedEnumInvoiceItemTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceItemType | EnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceItemType[] | ListEnumInvoiceItemTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceItemTypeWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceItemType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceItemTypeFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceItemTypeFilter<$PrismaModel>
+  }
+
   export type NestedEnumPaymentMethodFilter<$PrismaModel = never> = {
     equals?: $Enums.PaymentMethod | EnumPaymentMethodFieldRefInput<$PrismaModel>
     in?: $Enums.PaymentMethod[] | ListEnumPaymentMethodFieldRefInput<$PrismaModel>
@@ -14430,6 +16071,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     contracts?: ContractCreateNestedManyWithoutRoomInput
+    roomServices?: RoomServiceCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateWithoutPropertyInput = {
@@ -14442,6 +16084,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     contracts?: ContractUncheckedCreateNestedManyWithoutRoomInput
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomCreateOrConnectWithoutPropertyInput = {
@@ -14460,6 +16103,7 @@ export namespace Prisma {
     unit: string
     price: number
     isMetered?: boolean
+    roomServices?: RoomServiceCreateNestedManyWithoutServiceInput
     invoiceItems?: InvoiceItemCreateNestedManyWithoutServiceInput
   }
 
@@ -14469,6 +16113,7 @@ export namespace Prisma {
     unit: string
     price: number
     isMetered?: boolean
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutServiceInput
     invoiceItems?: InvoiceItemUncheckedCreateNestedManyWithoutServiceInput
   }
 
@@ -14643,6 +16288,28 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RoomServiceCreateWithoutRoomInput = {
+    id?: string
+    createdAt?: Date | string
+    service: ServiceCreateNestedOneWithoutRoomServicesInput
+  }
+
+  export type RoomServiceUncheckedCreateWithoutRoomInput = {
+    id?: string
+    serviceId: string
+    createdAt?: Date | string
+  }
+
+  export type RoomServiceCreateOrConnectWithoutRoomInput = {
+    where: RoomServiceWhereUniqueInput
+    create: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput>
+  }
+
+  export type RoomServiceCreateManyRoomInputEnvelope = {
+    data: RoomServiceCreateManyRoomInput | RoomServiceCreateManyRoomInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PropertyUpsertWithoutRoomsInput = {
     update: XOR<PropertyUpdateWithoutRoomsInput, PropertyUncheckedUpdateWithoutRoomsInput>
     create: XOR<PropertyCreateWithoutRoomsInput, PropertyUncheckedCreateWithoutRoomsInput>
@@ -14692,6 +16359,32 @@ export namespace Prisma {
     data: XOR<ContractUpdateManyMutationInput, ContractUncheckedUpdateManyWithoutRoomInput>
   }
 
+  export type RoomServiceUpsertWithWhereUniqueWithoutRoomInput = {
+    where: RoomServiceWhereUniqueInput
+    update: XOR<RoomServiceUpdateWithoutRoomInput, RoomServiceUncheckedUpdateWithoutRoomInput>
+    create: XOR<RoomServiceCreateWithoutRoomInput, RoomServiceUncheckedCreateWithoutRoomInput>
+  }
+
+  export type RoomServiceUpdateWithWhereUniqueWithoutRoomInput = {
+    where: RoomServiceWhereUniqueInput
+    data: XOR<RoomServiceUpdateWithoutRoomInput, RoomServiceUncheckedUpdateWithoutRoomInput>
+  }
+
+  export type RoomServiceUpdateManyWithWhereWithoutRoomInput = {
+    where: RoomServiceScalarWhereInput
+    data: XOR<RoomServiceUpdateManyMutationInput, RoomServiceUncheckedUpdateManyWithoutRoomInput>
+  }
+
+  export type RoomServiceScalarWhereInput = {
+    AND?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+    OR?: RoomServiceScalarWhereInput[]
+    NOT?: RoomServiceScalarWhereInput | RoomServiceScalarWhereInput[]
+    id?: StringFilter<"RoomService"> | string
+    roomId?: StringFilter<"RoomService"> | string
+    serviceId?: StringFilter<"RoomService"> | string
+    createdAt?: DateTimeFilter<"RoomService"> | Date | string
+  }
+
   export type PropertyCreateWithoutServicesInput = {
     id?: string
     name: string
@@ -14719,8 +16412,32 @@ export namespace Prisma {
     create: XOR<PropertyCreateWithoutServicesInput, PropertyUncheckedCreateWithoutServicesInput>
   }
 
+  export type RoomServiceCreateWithoutServiceInput = {
+    id?: string
+    createdAt?: Date | string
+    room: RoomCreateNestedOneWithoutRoomServicesInput
+  }
+
+  export type RoomServiceUncheckedCreateWithoutServiceInput = {
+    id?: string
+    roomId: string
+    createdAt?: Date | string
+  }
+
+  export type RoomServiceCreateOrConnectWithoutServiceInput = {
+    where: RoomServiceWhereUniqueInput
+    create: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput>
+  }
+
+  export type RoomServiceCreateManyServiceInputEnvelope = {
+    data: RoomServiceCreateManyServiceInput | RoomServiceCreateManyServiceInput[]
+    skipDuplicates?: boolean
+  }
+
   export type InvoiceItemCreateWithoutServiceInput = {
     id?: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -14732,6 +16449,8 @@ export namespace Prisma {
   export type InvoiceItemUncheckedCreateWithoutServiceInput = {
     id?: string
     invoiceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -14782,6 +16501,22 @@ export namespace Prisma {
     rooms?: RoomUncheckedUpdateManyWithoutPropertyNestedInput
   }
 
+  export type RoomServiceUpsertWithWhereUniqueWithoutServiceInput = {
+    where: RoomServiceWhereUniqueInput
+    update: XOR<RoomServiceUpdateWithoutServiceInput, RoomServiceUncheckedUpdateWithoutServiceInput>
+    create: XOR<RoomServiceCreateWithoutServiceInput, RoomServiceUncheckedCreateWithoutServiceInput>
+  }
+
+  export type RoomServiceUpdateWithWhereUniqueWithoutServiceInput = {
+    where: RoomServiceWhereUniqueInput
+    data: XOR<RoomServiceUpdateWithoutServiceInput, RoomServiceUncheckedUpdateWithoutServiceInput>
+  }
+
+  export type RoomServiceUpdateManyWithWhereWithoutServiceInput = {
+    where: RoomServiceScalarWhereInput
+    data: XOR<RoomServiceUpdateManyMutationInput, RoomServiceUncheckedUpdateManyWithoutServiceInput>
+  }
+
   export type InvoiceItemUpsertWithWhereUniqueWithoutServiceInput = {
     where: InvoiceItemWhereUniqueInput
     update: XOR<InvoiceItemUpdateWithoutServiceInput, InvoiceItemUncheckedUpdateWithoutServiceInput>
@@ -14804,12 +16539,138 @@ export namespace Prisma {
     NOT?: InvoiceItemScalarWhereInput | InvoiceItemScalarWhereInput[]
     id?: StringFilter<"InvoiceItem"> | string
     invoiceId?: StringFilter<"InvoiceItem"> | string
-    serviceId?: StringFilter<"InvoiceItem"> | string
+    type?: EnumInvoiceItemTypeFilter<"InvoiceItem"> | $Enums.InvoiceItemType
+    description?: StringNullableFilter<"InvoiceItem"> | string | null
+    serviceId?: StringNullableFilter<"InvoiceItem"> | string | null
     oldIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     newIndicator?: FloatNullableFilter<"InvoiceItem"> | number | null
     quantity?: FloatFilter<"InvoiceItem"> | number
     unitPrice?: FloatFilter<"InvoiceItem"> | number
     amount?: FloatFilter<"InvoiceItem"> | number
+  }
+
+  export type RoomCreateWithoutRoomServicesInput = {
+    id?: string
+    name: string
+    price: number
+    area?: number | null
+    capacity: number
+    status?: $Enums.RoomStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    property: PropertyCreateNestedOneWithoutRoomsInput
+    contracts?: ContractCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutRoomServicesInput = {
+    id?: string
+    name: string
+    price: number
+    area?: number | null
+    capacity: number
+    status?: $Enums.RoomStatus
+    propertyId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contracts?: ContractUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutRoomServicesInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutRoomServicesInput, RoomUncheckedCreateWithoutRoomServicesInput>
+  }
+
+  export type ServiceCreateWithoutRoomServicesInput = {
+    id?: string
+    name: string
+    unit: string
+    price: number
+    isMetered?: boolean
+    property: PropertyCreateNestedOneWithoutServicesInput
+    invoiceItems?: InvoiceItemCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceUncheckedCreateWithoutRoomServicesInput = {
+    id?: string
+    name: string
+    unit: string
+    price: number
+    isMetered?: boolean
+    propertyId: string
+    invoiceItems?: InvoiceItemUncheckedCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceCreateOrConnectWithoutRoomServicesInput = {
+    where: ServiceWhereUniqueInput
+    create: XOR<ServiceCreateWithoutRoomServicesInput, ServiceUncheckedCreateWithoutRoomServicesInput>
+  }
+
+  export type RoomUpsertWithoutRoomServicesInput = {
+    update: XOR<RoomUpdateWithoutRoomServicesInput, RoomUncheckedUpdateWithoutRoomServicesInput>
+    create: XOR<RoomCreateWithoutRoomServicesInput, RoomUncheckedCreateWithoutRoomServicesInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutRoomServicesInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutRoomServicesInput, RoomUncheckedUpdateWithoutRoomServicesInput>
+  }
+
+  export type RoomUpdateWithoutRoomServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    area?: NullableFloatFieldUpdateOperationsInput | number | null
+    capacity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    property?: PropertyUpdateOneRequiredWithoutRoomsNestedInput
+    contracts?: ContractUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutRoomServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    area?: NullableFloatFieldUpdateOperationsInput | number | null
+    capacity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    propertyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contracts?: ContractUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type ServiceUpsertWithoutRoomServicesInput = {
+    update: XOR<ServiceUpdateWithoutRoomServicesInput, ServiceUncheckedUpdateWithoutRoomServicesInput>
+    create: XOR<ServiceCreateWithoutRoomServicesInput, ServiceUncheckedCreateWithoutRoomServicesInput>
+    where?: ServiceWhereInput
+  }
+
+  export type ServiceUpdateToOneWithWhereWithoutRoomServicesInput = {
+    where?: ServiceWhereInput
+    data: XOR<ServiceUpdateWithoutRoomServicesInput, ServiceUncheckedUpdateWithoutRoomServicesInput>
+  }
+
+  export type ServiceUpdateWithoutRoomServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    unit?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    isMetered?: BoolFieldUpdateOperationsInput | boolean
+    property?: PropertyUpdateOneRequiredWithoutServicesNestedInput
+    invoiceItems?: InvoiceItemUpdateManyWithoutServiceNestedInput
+  }
+
+  export type ServiceUncheckedUpdateWithoutRoomServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    unit?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    isMetered?: BoolFieldUpdateOperationsInput | boolean
+    propertyId?: StringFieldUpdateOperationsInput | string
+    invoiceItems?: InvoiceItemUncheckedUpdateManyWithoutServiceNestedInput
   }
 
   export type RoomCreateWithoutContractsInput = {
@@ -14822,6 +16683,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     property: PropertyCreateNestedOneWithoutRoomsInput
+    roomServices?: RoomServiceCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateWithoutContractsInput = {
@@ -14834,6 +16696,7 @@ export namespace Prisma {
     propertyId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomCreateOrConnectWithoutContractsInput = {
@@ -14931,6 +16794,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     property?: PropertyUpdateOneRequiredWithoutRoomsNestedInput
+    roomServices?: RoomServiceUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateWithoutContractsInput = {
@@ -14943,6 +16807,7 @@ export namespace Prisma {
     propertyId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type UserUpsertWithoutContractsInput = {
@@ -15049,17 +16914,21 @@ export namespace Prisma {
 
   export type InvoiceItemCreateWithoutInvoiceInput = {
     id?: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
     unitPrice: number
     amount: number
-    service: ServiceCreateNestedOneWithoutInvoiceItemsInput
+    service?: ServiceCreateNestedOneWithoutInvoiceItemsInput
   }
 
   export type InvoiceItemUncheckedCreateWithoutInvoiceInput = {
     id?: string
-    serviceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
+    serviceId?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -15226,6 +17095,7 @@ export namespace Prisma {
     price: number
     isMetered?: boolean
     property: PropertyCreateNestedOneWithoutServicesInput
+    roomServices?: RoomServiceCreateNestedManyWithoutServiceInput
   }
 
   export type ServiceUncheckedCreateWithoutInvoiceItemsInput = {
@@ -15235,6 +17105,7 @@ export namespace Prisma {
     price: number
     isMetered?: boolean
     propertyId: string
+    roomServices?: RoomServiceUncheckedCreateNestedManyWithoutServiceInput
   }
 
   export type ServiceCreateOrConnectWithoutInvoiceItemsInput = {
@@ -15299,6 +17170,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
     property?: PropertyUpdateOneRequiredWithoutServicesNestedInput
+    roomServices?: RoomServiceUpdateManyWithoutServiceNestedInput
   }
 
   export type ServiceUncheckedUpdateWithoutInvoiceItemsInput = {
@@ -15308,6 +17180,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
     propertyId?: StringFieldUpdateOperationsInput | string
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutServiceNestedInput
   }
 
   export type InvoiceCreateWithoutPaymentsInput = {
@@ -15505,6 +17378,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contracts?: ContractUpdateManyWithoutRoomNestedInput
+    roomServices?: RoomServiceUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateWithoutPropertyInput = {
@@ -15517,6 +17391,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contracts?: ContractUncheckedUpdateManyWithoutRoomNestedInput
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateManyWithoutPropertyInput = {
@@ -15536,6 +17411,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
+    roomServices?: RoomServiceUpdateManyWithoutServiceNestedInput
     invoiceItems?: InvoiceItemUpdateManyWithoutServiceNestedInput
   }
 
@@ -15545,6 +17421,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
     isMetered?: BoolFieldUpdateOperationsInput | boolean
+    roomServices?: RoomServiceUncheckedUpdateManyWithoutServiceNestedInput
     invoiceItems?: InvoiceItemUncheckedUpdateManyWithoutServiceNestedInput
   }
 
@@ -15567,6 +17444,12 @@ export namespace Prisma {
     tenantId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type RoomServiceCreateManyRoomInput = {
+    id?: string
+    serviceId: string
+    createdAt?: Date | string
   }
 
   export type ContractUpdateWithoutRoomInput = {
@@ -15610,9 +17493,35 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RoomServiceUpdateWithoutRoomInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    service?: ServiceUpdateOneRequiredWithoutRoomServicesNestedInput
+  }
+
+  export type RoomServiceUncheckedUpdateWithoutRoomInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomServiceUncheckedUpdateManyWithoutRoomInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomServiceCreateManyServiceInput = {
+    id?: string
+    roomId: string
+    createdAt?: Date | string
+  }
+
   export type InvoiceItemCreateManyServiceInput = {
     id?: string
     invoiceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -15620,8 +17529,28 @@ export namespace Prisma {
     amount: number
   }
 
+  export type RoomServiceUpdateWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    room?: RoomUpdateOneRequiredWithoutRoomServicesNestedInput
+  }
+
+  export type RoomServiceUncheckedUpdateWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomServiceUncheckedUpdateManyWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roomId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type InvoiceItemUpdateWithoutServiceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -15633,6 +17562,8 @@ export namespace Prisma {
   export type InvoiceItemUncheckedUpdateWithoutServiceInput = {
     id?: StringFieldUpdateOperationsInput | string
     invoiceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -15643,6 +17574,8 @@ export namespace Prisma {
   export type InvoiceItemUncheckedUpdateManyWithoutServiceInput = {
     id?: StringFieldUpdateOperationsInput | string
     invoiceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -15704,7 +17637,9 @@ export namespace Prisma {
 
   export type InvoiceItemCreateManyInvoiceInput = {
     id?: string
-    serviceId: string
+    type?: $Enums.InvoiceItemType
+    description?: string | null
+    serviceId?: string | null
     oldIndicator?: number | null
     newIndicator?: number | null
     quantity: number
@@ -15722,17 +17657,21 @@ export namespace Prisma {
 
   export type InvoiceItemUpdateWithoutInvoiceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
     unitPrice?: FloatFieldUpdateOperationsInput | number
     amount?: FloatFieldUpdateOperationsInput | number
-    service?: ServiceUpdateOneRequiredWithoutInvoiceItemsNestedInput
+    service?: ServiceUpdateOneWithoutInvoiceItemsNestedInput
   }
 
   export type InvoiceItemUncheckedUpdateWithoutInvoiceInput = {
     id?: StringFieldUpdateOperationsInput | string
-    serviceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number
@@ -15742,7 +17681,9 @@ export namespace Prisma {
 
   export type InvoiceItemUncheckedUpdateManyWithoutInvoiceInput = {
     id?: StringFieldUpdateOperationsInput | string
-    serviceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumInvoiceItemTypeFieldUpdateOperationsInput | $Enums.InvoiceItemType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     oldIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     newIndicator?: NullableFloatFieldUpdateOperationsInput | number | null
     quantity?: FloatFieldUpdateOperationsInput | number

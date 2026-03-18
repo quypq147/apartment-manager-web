@@ -163,6 +163,13 @@ exports.Prisma.ServiceScalarFieldEnum = {
   propertyId: 'propertyId'
 };
 
+exports.Prisma.RoomServiceScalarFieldEnum = {
+  id: 'id',
+  roomId: 'roomId',
+  serviceId: 'serviceId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ContractScalarFieldEnum = {
   id: 'id',
   deposit: 'deposit',
@@ -193,6 +200,8 @@ exports.Prisma.InvoiceScalarFieldEnum = {
 exports.Prisma.InvoiceItemScalarFieldEnum = {
   id: 'id',
   invoiceId: 'invoiceId',
+  type: 'type',
+  description: 'description',
   serviceId: 'serviceId',
   oldIndicator: 'oldIndicator',
   newIndicator: 'newIndicator',
@@ -249,6 +258,13 @@ exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
   OVERDUE: 'OVERDUE'
 };
 
+exports.InvoiceItemType = exports.$Enums.InvoiceItemType = {
+  ROOM_FEE: 'ROOM_FEE',
+  DEPOSIT: 'DEPOSIT',
+  SERVICE: 'SERVICE',
+  OTHER: 'OTHER'
+};
+
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CASH: 'CASH',
   BANK_TRANSFER: 'BANK_TRANSFER'
@@ -259,6 +275,7 @@ exports.Prisma.ModelName = {
   Property: 'Property',
   Room: 'Room',
   Service: 'Service',
+  RoomService: 'RoomService',
   Contract: 'Contract',
   Invoice: 'Invoice',
   InvoiceItem: 'InvoiceItem',

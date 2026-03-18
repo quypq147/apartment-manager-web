@@ -13,6 +13,7 @@ import {
   Menu
 } from "lucide-react";
 import { NavLink } from "@/components/nav-link";
+import { ChatBot } from "@/components/chat-bot";
 
 export default function OwnerLayout({
   children,
@@ -110,6 +111,8 @@ export default function OwnerLayout({
           {children}
         </div>
       </main>
+
+      <ChatBot />
     </div>
   );
 }

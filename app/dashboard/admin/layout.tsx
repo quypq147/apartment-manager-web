@@ -11,6 +11,7 @@ import {
   Menu,
 } from "lucide-react";
 import { NavLink } from "@/components/nav-link";
+import { ChatBot } from "@/components/chat-bot";
 
 export default function AdminLayout({
   children,
@@ -97,6 +98,8 @@ export default function AdminLayout({
           {children}
         </div>
       </main>
+
+      <ChatBot />
     </div>
   );
 }

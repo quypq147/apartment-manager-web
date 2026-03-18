@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import {generateNextServiceId} from "@/lib/service-id";
 
 interface CreateServiceBody {
   propertyId: string;
@@ -119,8 +120,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const nextServiceId = await generateNextServiceId();
+
     const service = await prisma.service.create({
       data: {
+        id: nextServiceId,
         propertyId,
         name: name.trim(),
         unit: unit.trim(),

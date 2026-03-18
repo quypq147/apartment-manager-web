@@ -143,6 +143,7 @@ export interface TenantDashboardData {
     address: string;
     price: number;
     area: number | null;
+    capacity: number;
     contractStartDate: string;
     contractEndDate: string | null;
   } | null;
@@ -160,6 +161,17 @@ export interface TenantNotification {
   createdAt: string;
 }
 
+export interface TenantService {
+  id: string;
+  name: string;
+  unit: string;
+  unitPrice: number;
+  quantity: number;
+  isMetered: boolean;
+  note: string;
+  enabled: boolean;
+}
+
 export function getTenantDashboard(userId?: string): Promise<ApiResult<TenantDashboardData>> {
   return apiRequest<TenantDashboardData>("/api/tenant/dashboard", {
     userId,
@@ -169,6 +181,13 @@ export function getTenantDashboard(userId?: string): Promise<ApiResult<TenantDas
 
 export function getTenantNotifications(userId?: string): Promise<ApiResult<TenantNotification[]>> {
   return apiRequest<TenantNotification[]>("/api/tenant/notifications", {
+    userId,
+    role: "TENANT",
+  });
+}
+
+export function getTenantServices(userId?: string): Promise<ApiResult<TenantService[]>> {
+  return apiRequest<TenantService[]>("/api/tenant/services", {
     userId,
     role: "TENANT",
   });

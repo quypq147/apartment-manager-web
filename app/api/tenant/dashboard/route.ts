@@ -124,6 +124,7 @@ export async function GET(request: NextRequest) {
             address: currentContract.room.property.address,
             price: currentContract.roomPrice,
             area: currentContract.room.area,
+            capacity: currentContract.room.capacity,
             contractStartDate: currentContract.startDate,
             contractEndDate: currentContract.endDate,
             contractStatus: currentContract.status,

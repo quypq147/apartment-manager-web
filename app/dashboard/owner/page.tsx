@@ -14,6 +14,7 @@ import {
   type OwnerDashboardStats,
 } from "@/lib/api/owner";
 import { RevenueChart, RoomOccupancyChart } from "@/components/dashboard-charts";
+import { AIOverview } from "@/components/dashboard/ai-overview";
 
 const currency = new Intl.NumberFormat("vi-VN");
 
@@ -158,6 +159,8 @@ export default function OwnerDashboard() {
 
       {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {!loading && !error && <AIOverview stats={stats} />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-6 bg-card rounded-2xl shadow-sm border border-border flex items-start justify-between">

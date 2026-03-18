@@ -11,6 +11,20 @@ import {
   type OwnerService,
 } from "@/lib/api/owner";
 
+function normalizeServiceName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[Đđ]/g, "d")  // Đ does not decompose via NFD, must replace explicitly
+    .trim()
+    .toLowerCase();
+}
+
+function isDefaultRoomService(serviceName: string): boolean {
+  const normalized = normalizeServiceName(serviceName);
+  return normalized === "dien" || normalized === "nuoc";
+}
+
 const currency = new Intl.NumberFormat("vi-VN");
 
 interface ManageRoomsPageProps {
@@ -37,6 +51,7 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
 
   const loadProperty = async () => {
     const resolvedParams = await params;
+
     setPropertyId(resolvedParams.propertyId);
 
     const [propertiesResult, servicesResult] = await Promise.all([
@@ -64,10 +79,7 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
     setServices(loadedServices);
 
     const defaultServiceIds = loadedServices
-      .filter((service) => {
-        const normalizedName = service.name.trim().toLowerCase();
-        return normalizedName === "điện" || normalizedName === "nước";
-      })
+      .filter((service) => isDefaultRoomService(service.name))
       .map((service) => service.id);
 
     setSelectedServiceIds(defaultServiceIds);
@@ -129,11 +141,12 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
     await loadProperty();
   };
 
+  const defaultServices = useMemo(() => {
+    return services.filter((service) => isDefaultRoomService(service.name));
+  }, [services]);
+
   const additionalServices = useMemo(() => {
-    return services.filter((service) => {
-      const normalizedName = service.name.trim().toLowerCase();
-      return normalizedName !== "điện" && normalizedName !== "nước";
-    });
+    return services.filter((service) => !isDefaultRoomService(service.name));
   }, [services]);
 
   const handleToggleService = (serviceId: string) => {
@@ -219,14 +232,13 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
             <p className="text-sm font-medium text-foreground">Dịch vụ áp dụng cho phòng</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-              <label className="inline-flex items-center gap-2 text-foreground">
-                <input type="checkbox" checked disabled />
-                Điện (gắn sẵn)
-              </label>
-              <label className="inline-flex items-center gap-2 text-foreground">
-                <input type="checkbox" checked disabled />
-                Nước (gắn sẵn)
-              </label>
+              {defaultServices.map((service) => (
+                <label key={service.id} className="inline-flex items-center gap-2 text-muted-foreground cursor-not-allowed">
+                  <input type="checkbox" checked disabled readOnly />
+                  {service.name} ({service.unit})
+                  <span className="text-xs">(mặc định)</span>
+                </label>
+              ))}
 
               {additionalServices.map((service) => (
                 <label key={service.id} className="inline-flex items-center gap-2 text-foreground">
@@ -240,7 +252,7 @@ export default function ManageRoomsPage({ params }: ManageRoomsPageProps) {
               ))}
             </div>
 
-            {additionalServices.length === 0 && (
+            {defaultServices.length === 0 && additionalServices.length === 0 && (
               <p className="text-xs text-muted-foreground">
                 Chưa có dịch vụ tùy chọn khác. Bạn có thể thêm tại trang Quản lý Dịch vụ.
               </p>

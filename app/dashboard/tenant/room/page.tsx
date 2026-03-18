@@ -1,79 +1,108 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Home, Building2, MapPin, Zap, Droplets, Wifi, Trash2, ShieldCheck } from "lucide-react";
-
-type ServiceKey = "electricity" | "water" | "wifi" | "trash" | "security";
-
-interface ServiceState {
-  key: ServiceKey;
-  name: string;
-  unit: string;
-  unitPrice: number;
-  quantity: number;
-  includedInInvoice: boolean;
-  icon: React.ReactNode;
-}
+import { useEffect, useMemo, type ReactNode, useState } from "react";
+import { Home, Building2, MapPin, Zap, Droplets, Wifi, Trash2, ShieldCheck, Wrench } from "lucide-react";
+import {
+  getTenantDashboard,
+  getTenantServices,
+  type TenantDashboardData,
+  type TenantService,
+} from "@/lib/api/tenant";
 
 function formatCurrency(value: number) {
   return value.toLocaleString("vi-VN") + " đ";
 }
 
-export default function TenantRoomManagementPage() {
-  const [services, setServices] = useState<ServiceState[]>([
-    {
-      key: "electricity",
-      name: "Điện sinh hoạt",
-      unit: "kWh",
-      unitPrice: 3500,
-      quantity: 128,
-      includedInInvoice: true,
-      icon: <Zap className="w-5 h-5 text-amber-600" />,
-    },
-    {
-      key: "water",
-      name: "Nước sinh hoạt",
-      unit: "m3",
-      unitPrice: 18000,
-      quantity: 14,
-      includedInInvoice: true,
-      icon: <Droplets className="w-5 h-5 text-blue-600" />,
-    },
-    {
-      key: "wifi",
-      name: "Internet",
-      unit: "tháng",
-      unitPrice: 180000,
-      quantity: 1,
-      includedInInvoice: true,
-      icon: <Wifi className="w-5 h-5 text-cyan-600" />,
-    },
-    {
-      key: "trash",
-      name: "Vệ sinh rác",
-      unit: "tháng",
-      unitPrice: 35000,
-      quantity: 1,
-      includedInInvoice: true,
-      icon: <Trash2 className="w-5 h-5 text-green-600" />,
-    },
-    {
-      key: "security",
-      name: "An ninh & giữ xe",
-      unit: "tháng",
-      unitPrice: 120000,
-      quantity: 1,
-      includedInInvoice: false,
-      icon: <ShieldCheck className="w-5 h-5 text-violet-600" />,
-    },
-  ]);
+function normalizeVietnameseText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[Đđ]/g, "d")
+    .trim()
+    .toLowerCase();
+}
 
-  const monthlyRent = 3500000;
+function getServiceIcon(name: string): ReactNode {
+  const normalized = normalizeVietnameseText(name);
+
+  if (normalized.includes("wifi") || normalized.includes("internet")) {
+    return <Wifi className="w-5 h-5 text-cyan-600" />;
+  }
+
+  if (normalized.includes("nuoc")) {
+    return <Droplets className="w-5 h-5 text-blue-600" />;
+  }
+
+  if (normalized.includes("dien")) {
+    return <Zap className="w-5 h-5 text-amber-600" />;
+  }
+
+  if (normalized.includes("rac") || normalized.includes("ve sinh")) {
+    return <Trash2 className="w-5 h-5 text-green-600" />;
+  }
+
+  if (normalized.includes("an ninh") || normalized.includes("giu xe")) {
+    return <ShieldCheck className="w-5 h-5 text-violet-600" />;
+  }
+
+  return <Wrench className="w-5 h-5 text-orange-600" />;
+}
+
+export default function TenantRoomManagementPage() {
+  const [roomInfo, setRoomInfo] = useState<TenantDashboardData["roomInfo"]>(null);
+  const [services, setServices] = useState<TenantService[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadData = async () => {
+      setLoading(true);
+      const [dashboardResult, servicesResult] = await Promise.all([
+        getTenantDashboard(),
+        getTenantServices(),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      if (!dashboardResult.success) {
+        setError(dashboardResult.error ?? "Không thể tải thông tin phòng");
+        setRoomInfo(null);
+        setServices([]);
+        setLoading(false);
+        return;
+      }
+
+      if (!servicesResult.success) {
+        setError(servicesResult.error ?? "Không thể tải dịch vụ phòng");
+        setRoomInfo(dashboardResult.data?.roomInfo ?? null);
+        setServices([]);
+        setLoading(false);
+        return;
+      }
+
+      setRoomInfo(dashboardResult.data?.roomInfo ?? null);
+      setServices(servicesResult.data ?? []);
+      setError(null);
+      setLoading(false);
+    };
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const monthlyRent = roomInfo?.price ?? 0;
 
   const serviceTotal = useMemo(
     () =>
       services.reduce((sum, service) => {
-        if (!service.includedInInvoice) {
+        if (!service.enabled) {
           return sum;
         }
         return sum + service.unitPrice * service.quantity;
@@ -83,27 +112,27 @@ export default function TenantRoomManagementPage() {
 
   const estimatedTotal = monthlyRent + serviceTotal;
 
-  const toggleService = (key: ServiceKey) => {
-    setServices((prev) =>
-      prev.map((service) =>
-        service.key === key
-          ? { ...service, includedInInvoice: !service.includedInInvoice }
-          : service
-      )
-    );
-  };
-
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Quản lý phòng</h1>
           <p className="text-muted-foreground mt-1">
-            Theo dõi phòng đang thuê và các dịch vụ đi kèm (mock trước khi nối API).
+            Theo dõi phòng đang thuê và các dịch vụ đi kèm.
           </p>
         </div>
       </header>
 
+      {loading && <p className="text-sm text-muted-foreground">Đang tải dữ liệu phòng...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {!loading && !error && !roomInfo && (
+        <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+          <p className="text-sm text-muted-foreground">Hiện tại bạn chưa có hợp đồng thuê đang hiệu lực.</p>
+        </div>
+      )}
+
+      {roomInfo && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-card rounded-2xl border border-border shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -111,8 +140,8 @@ export default function TenantRoomManagementPage() {
               <Home className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Phòng B-302</h2>
-              <p className="text-sm text-muted-foreground">Tòa nhà Sunrise Mini Apartment</p>
+              <h2 className="text-xl font-bold text-foreground">{roomInfo.name}</h2>
+              <p className="text-sm text-muted-foreground">{roomInfo.property}</p>
             </div>
           </div>
 
@@ -121,21 +150,23 @@ export default function TenantRoomManagementPage() {
               <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
                 <Building2 className="w-4 h-4" /> Khu trọ
               </p>
-              <p className="font-medium text-foreground">Sunrise Mini Apartment</p>
+              <p className="font-medium text-foreground">{roomInfo.property}</p>
             </div>
             <div className="rounded-xl border border-border p-4 bg-muted/30">
               <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" /> Địa chỉ
               </p>
-              <p className="font-medium text-foreground">28 Nguyễn Trãi, Quận 1, TP.HCM</p>
+              <p className="font-medium text-foreground">{roomInfo.address}</p>
             </div>
             <div className="rounded-xl border border-border p-4 bg-muted/30">
               <p className="text-sm text-muted-foreground">Diện tích</p>
-              <p className="font-medium text-foreground mt-1">24 m2</p>
+              <p className="font-medium text-foreground mt-1">
+                {typeof roomInfo.area === "number" ? `${roomInfo.area} m2` : "--"}
+              </p>
             </div>
             <div className="rounded-xl border border-border p-4 bg-muted/30">
               <p className="text-sm text-muted-foreground">Sức chứa tối đa</p>
-              <p className="font-medium text-foreground mt-1">2 người</p>
+              <p className="font-medium text-foreground mt-1">{roomInfo.capacity} người</p>
             </div>
           </div>
         </div>
@@ -157,18 +188,23 @@ export default function TenantRoomManagementPage() {
             <span className="text-xl font-bold text-blue-600">{formatCurrency(estimatedTotal)}</span>
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Giá trị trên chỉ để mô phỏng, sẽ thay bằng dữ liệu API thực tế.
+            Tổng tạm tính dựa trên giá phòng và dịch vụ hiện đang áp dụng.
           </p>
         </div>
       </div>
+      )}
 
       <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-xl font-bold text-foreground">Dịch vụ phòng</h3>
-            <p className="text-sm text-muted-foreground">Bật/tắt mô phỏng dịch vụ tính vào hóa đơn tháng.</p>
+            <p className="text-sm text-muted-foreground">Danh sách dịch vụ được cấu hình cho phòng của bạn.</p>
           </div>
         </div>
+
+        {!loading && !error && services.length === 0 && (
+          <p className="text-sm text-muted-foreground mb-4">Phòng hiện tại chưa có dịch vụ nào.</p>
+        )}
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-190">
@@ -185,10 +221,10 @@ export default function TenantRoomManagementPage() {
               {services.map((service) => {
                 const lineTotal = service.unitPrice * service.quantity;
                 return (
-                  <tr key={service.key} className="hover:bg-muted/40 transition-colors">
+                  <tr key={service.id} className="hover:bg-muted/40 transition-colors">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-muted">{service.icon}</div>
+                        <div className="p-2 rounded-lg bg-muted">{getServiceIcon(service.name)}</div>
                         <span className="font-medium text-foreground">{service.name}</span>
                       </div>
                     </td>
@@ -196,16 +232,13 @@ export default function TenantRoomManagementPage() {
                     <td className="px-4 py-4 text-sm text-foreground">{service.quantity} {service.unit}</td>
                     <td className="px-4 py-4 text-sm font-medium text-foreground">{formatCurrency(lineTotal)}</td>
                     <td className="px-4 py-4">
-                      <button
-                        onClick={() => toggleService(service.key)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                          service.includedInInvoice
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      <span
+                        className={`inline-flex px-3 py-1.5 rounded-lg text-sm font-medium ${
+                          service.enabled ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {service.includedInInvoice ? "Đang tính" : "Tắt tính phí"}
-                      </button>
+                        {service.enabled ? "Đang tính" : "Chưa tính"}
+                      </span>
                     </td>
                   </tr>
                 );
