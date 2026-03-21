@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getTenantInvoices, payTenantInvoice, type TenantInvoice } from "@/lib/api/tenant";
+import { createVnpayPaymentUrl, getTenantInvoices, type TenantInvoice } from "@/lib/api/tenant";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FileText, Filter, Download, CreditCard, CheckCircle2 } from "lucide-react";
 
 function formatDate(input: string | null) {
@@ -19,6 +20,8 @@ function formatDate(input: string | null) {
 }
 
 export default function TenantInvoices() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [invoices, setInvoices] = useState<TenantInvoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +58,33 @@ export default function TenantInvoices() {
     };
   }, []);
 
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const code = searchParams.get("code");
+    const invoiceId = searchParams.get("invoiceId");
+
+    if (!payment) {
+      return;
+    }
+
+    if (payment === "success") {
+      setPaymentMessage(
+        invoiceId
+          ? `Thanh toán thành công cho hóa đơn ${invoiceId}.`
+          : "Thanh toán thành công."
+      );
+      setError(null);
+    } else {
+      setError(
+        code
+          ? `Thanh toán thất bại (mã: ${code}). Vui lòng thử lại.`
+          : "Thanh toán thất bại. Vui lòng thử lại."
+      );
+    }
+
+    router.replace("/dashboard/tenant/invoices");
+  }, [searchParams, router]);
+
   const filteredInvoices = useMemo(
     () => (selectedStatus === "all" ? invoices : invoices.filter((inv) => inv.status === selectedStatus)),
     [invoices, selectedStatus]
@@ -71,39 +101,15 @@ export default function TenantInvoices() {
     setError(null);
     setProcessingInvoiceId(invoice.id);
 
-    const result = await payTenantInvoice(
-      invoice.id,
-      remainingAmount,
-      undefined,
-      `TENANT-${invoice.id}-${Date.now()}`
-    );
+    const result = await createVnpayPaymentUrl(invoice.id);
 
-    if (!result.success || !result.data?.invoice) {
-      setError(result.error ?? "Không thể ghi nhận thanh toán");
+    if (!result.success || !result.data?.paymentUrl) {
+      setError(result.error ?? "Không thể khởi tạo thanh toán VNPAY");
       setProcessingInvoiceId(null);
       return;
     }
 
-    setInvoices((currentInvoices) =>
-      currentInvoices.map((currentInvoice) => {
-        if (currentInvoice.id !== result.data?.invoice.id) {
-          return currentInvoice;
-        }
-
-        return {
-          ...currentInvoice,
-          status: result.data.invoice.status,
-          paidAmount: result.data.invoice.paidAmount,
-          paidDate:
-            result.data.payment.paymentDate ??
-            currentInvoice.paidDate ??
-            new Date().toISOString(),
-        };
-      })
-    );
-
-    setProcessingInvoiceId(null);
-    setPaymentMessage(`Thanh toán thành công cho hóa đơn ${invoice.id}.`);
+    window.location.href = result.data.paymentUrl;
   };
 
   const getStatusColor = (status: string) => {
@@ -249,7 +255,7 @@ export default function TenantInvoices() {
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
                           >
                             <CreditCard className="w-4 h-4" />
-                            {processingInvoiceId === invoice.id ? "Đang xử lý..." : "Thanh toán"}
+                            {processingInvoiceId === invoice.id ? "Đang xử lý..." : "Thanh toán VNPAY"}
                           </button>
                         )}
                         <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" aria-label="Tải hóa đơn">

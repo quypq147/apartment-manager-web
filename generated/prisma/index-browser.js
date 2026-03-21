@@ -267,7 +267,8 @@ exports.InvoiceItemType = exports.$Enums.InvoiceItemType = {
 
 exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CASH: 'CASH',
-  BANK_TRANSFER: 'BANK_TRANSFER'
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  VNPAY: 'VNPAY'
 };
 
 exports.Prisma.ModelName = {

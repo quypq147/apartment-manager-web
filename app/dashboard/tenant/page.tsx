@@ -3,7 +3,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getTenantDashboard, getTenantNotifications, payTenantInvoice, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
+import { createVnpayPaymentUrl, getTenantDashboard, getTenantNotifications, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Home,
   AlertCircle,
@@ -27,6 +28,8 @@ function formatDate(input: string | null) {
 }
 
 export default function TenantDashboard() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showQRCode, setShowQRCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +87,33 @@ export default function TenantDashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const code = searchParams.get("code");
+    const invoiceId = searchParams.get("invoiceId");
+
+    if (!payment) {
+      return;
+    }
+
+    if (payment === "success") {
+      setPaymentMessage(
+        invoiceId
+          ? `Thanh toán thành công cho hóa đơn ${invoiceId}.`
+          : "Thanh toán thành công."
+      );
+      setError(null);
+    } else {
+      setError(
+        code
+          ? `Thanh toán thất bại (mã: ${code}). Vui lòng thử lại.`
+          : "Thanh toán thất bại. Vui lòng thử lại."
+      );
+    }
+
+    router.replace("/dashboard/tenant");
+  }, [searchParams, router]);
+
   const outstandingAmount = useMemo(
     () =>
       unpaidInvoices.reduce((sum, invoice) => {
@@ -117,31 +147,16 @@ export default function TenantDashboard() {
     setPaymentMessage(null);
     setError(null);
 
-    for (const invoice of unpaidInvoices) {
-      const remainingAmount = Math.max(invoice.totalAmount - invoice.paidAmount, 0);
+    const invoiceToPay = unpaidInvoices[0];
+    const result = await createVnpayPaymentUrl(invoiceToPay.id, undefined, "dashboard");
 
-      if (remainingAmount <= 0) {
-        continue;
-      }
-
-      const result = await payTenantInvoice(
-        invoice.id,
-        remainingAmount,
-        undefined,
-        `TENANT-QR-${invoice.id}-${Date.now()}`
-      );
-
-      if (!result.success) {
-        setError(result.error ?? `Không thể thanh toán hóa đơn ${invoice.id}`);
-        setPaymentProcessing(false);
-        return;
-      }
+    if (!result.success || !result.data?.paymentUrl) {
+      setError(result.error ?? `Không thể khởi tạo thanh toán hóa đơn ${invoiceToPay.id}`);
+      setPaymentProcessing(false);
+      return;
     }
 
-    setUnpaidInvoices([]);
-    setPaymentProcessing(false);
-    setShowQRCode(false);
-    setPaymentMessage("Thanh toán thành công. Công nợ đã được cập nhật.");
+    window.location.href = result.data.paymentUrl;
   };
 
   return (
@@ -354,7 +369,7 @@ export default function TenantDashboard() {
               </div>
               <div className="bg-blue-50 rounded-lg p-4">
                 <p className="text-xs text-blue-600">
-                  📱 Quét mã QR bằng ứng dụng ngân hàng của bạn để thanh toán
+                  📱 Thanh toán qua VNPAY để hệ thống tự động cập nhật trạng thái hóa đơn
                 </p>
               </div>
             </div>
@@ -365,7 +380,7 @@ export default function TenantDashboard() {
                 disabled={paymentProcessing}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {paymentProcessing ? "Đang xử lý..." : "Xác nhận đã thanh toán"}
+                {paymentProcessing ? "Đang xử lý..." : "Thanh toán qua VNPAY"}
               </button>
               <button
                 onClick={() => setShowQRCode(false)}

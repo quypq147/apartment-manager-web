@@ -35,7 +35,7 @@ export interface TenantPaymentResult {
   payment: {
     id: string;
     amount: number;
-    paymentMethod: "CASH" | "BANK_TRANSFER";
+    paymentMethod: "CASH" | "BANK_TRANSFER" | "VNPAY";
     reference: string | null;
     paymentDate?: string;
     invoiceId?: string;
@@ -52,6 +52,13 @@ export interface TenantPaymentResult {
       paymentDate?: string;
     }>;
   };
+}
+
+export interface TenantVnpayPaymentUrlResult {
+  paymentUrl: string;
+  invoiceId: string;
+  amount: number;
+  txnRef: string;
 }
 
 export interface TenantContract {
@@ -215,6 +222,19 @@ export function payTenantInvoice(
       paymentMethod: "BANK_TRANSFER",
       reference,
     },
+  });
+}
+
+export function createVnpayPaymentUrl(
+  invoiceId: string,
+  userId?: string,
+  redirectTo?: "dashboard" | "invoices"
+): Promise<ApiResult<TenantVnpayPaymentUrlResult>> {
+  return apiRequest<TenantVnpayPaymentUrlResult>(`/api/invoices/${invoiceId}/vnpay`, {
+    method: "POST",
+    userId,
+    role: "TENANT",
+    body: redirectTo ? { redirectTo } : undefined,
   });
 }
 

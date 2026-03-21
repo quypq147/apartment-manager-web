@@ -39,6 +39,7 @@ enum InvoiceStatus {
 enum PaymentMethod {
   CASH
   BANK_TRANSFER
+  VNPAY
 }
 
 enum InvoiceItemType {
