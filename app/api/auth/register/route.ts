@@ -9,6 +9,42 @@ interface RegisterBody {
   phone?: string;
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const email = request.nextUrl.searchParams.get("email")?.trim().toLowerCase();
+
+    if (!email) {
+      return NextResponse.json(
+        { success: false, error: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!email.includes("@")) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: { exists: Boolean(existingUser) },
+    });
+  } catch (error) {
+    console.error("GET /api/auth/register error", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RegisterBody;

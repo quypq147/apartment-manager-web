@@ -27,7 +27,7 @@ Không bịa thông tin ngoài ngữ cảnh cuộc trò chuyện.
     `;
 
     const result = await streamText({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash"),
       system: systemPrompt,
       messages,
       temperature: 0.4,
