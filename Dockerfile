@@ -17,6 +17,7 @@ RUN npx prisma generate
 # Build the Next.js application
 RUN npm run build
 
+ENV HOSTNAME="0.0.0.0"
 EXPOSE 3000
 
 # Use 'start' for production instead of 'dev'
