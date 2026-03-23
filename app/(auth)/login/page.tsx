@@ -1,10 +1,11 @@
 // app/(auth)/login/page.tsx
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { SignInForm } from "@/components/sign-in-form";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
@@ -25,5 +26,13 @@ export default function LoginPage() {
         <SignInForm />
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

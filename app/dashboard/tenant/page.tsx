@@ -1,7 +1,7 @@
 // app/dashboard/tenant/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createVnpayPaymentUrl, getTenantDashboard, getTenantNotifications, type TenantDashboardInvoice, type TenantNotification } from "@/lib/api/tenant";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,7 +27,7 @@ function formatDate(input: string | null) {
   return date.toLocaleDateString("vi-VN");
 }
 
-export default function TenantDashboard() {
+function TenantDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showQRCode, setShowQRCode] = useState(false);
@@ -394,5 +394,13 @@ export default function TenantDashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TenantDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <TenantDashboardContent />
+    </Suspense>
   );
 }

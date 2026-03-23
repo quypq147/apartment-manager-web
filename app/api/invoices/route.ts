@@ -36,21 +36,28 @@ export async function GET(request: NextRequest) {
     const monthParam = request.nextUrl.searchParams.get("month");
     const yearParam = request.nextUrl.searchParams.get("year");
 
-    const month = monthParam ? Number(monthParam) : undefined;
-    const year = yearParam ? Number(yearParam) : undefined;
-
-    if (monthParam && (!Number.isInteger(month) || month < 1 || month > 12)) {
-      return NextResponse.json(
-        { success: false, error: "month must be an integer from 1 to 12" },
-        { status: 400 }
-      );
+    let month: number | undefined;
+    if (monthParam !== null) {
+      const parsedMonth = Number(monthParam);
+      if (!Number.isInteger(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+        return NextResponse.json(
+          { success: false, error: "month must be an integer from 1 to 12" },
+          { status: 400 }
+        );
+      }
+      month = parsedMonth;
     }
 
-    if (yearParam && (!Number.isInteger(year) || year < 2000)) {
-      return NextResponse.json(
-        { success: false, error: "year must be a valid integer" },
-        { status: 400 }
-      );
+    let year: number | undefined;
+    if (yearParam !== null) {
+      const parsedYear = Number(yearParam);
+      if (!Number.isInteger(parsedYear) || parsedYear < 2000) {
+        return NextResponse.json(
+          { success: false, error: "year must be a valid integer" },
+          { status: 400 }
+        );
+      }
+      year = parsedYear;
     }
 
     const invoices = await prisma.invoice.findMany({
