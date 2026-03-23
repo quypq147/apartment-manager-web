@@ -242,7 +242,7 @@ export default function AdminDashboard() {
                     </td>
                     {landlordFilter === "pending" && (
                       <td className="px-6 py-4 text-muted-foreground text-sm">
-                        {landlord.createdDate}
+                        {"createdDate" in landlord ? landlord.createdDate : "-"}
                       </td>
                     )}
                     {landlordFilter === "active" && (
@@ -254,11 +254,13 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full">
-                            {landlord.tenants}
+                            {"tenants" in landlord ? landlord.tenants : 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 font-medium text-foreground">
-                          {landlord.monthlyRevenue.toLocaleString("vi-VN")} đ
+                          {"monthlyRevenue" in landlord
+                            ? landlord.monthlyRevenue.toLocaleString("vi-VN")
+                            : "0"} đ
                         </td>
                       </>
                     )}

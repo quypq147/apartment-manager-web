@@ -1,7 +1,7 @@
 // app/dashboard/tenant/invoices/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { createVnpayPaymentUrl, getTenantInvoices, type TenantInvoice } from "@/lib/api/tenant";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FileText, Filter, Download, CreditCard, CheckCircle2 } from "lucide-react";
@@ -19,7 +19,7 @@ function formatDate(input: string | null) {
   return date.toLocaleDateString("vi-VN");
 }
 
-export default function TenantInvoices() {
+function TenantInvoicesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -357,5 +357,13 @@ export default function TenantInvoices() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TenantInvoices() {
+  return (
+    <Suspense fallback={null}>
+      <TenantInvoicesContent />
+    </Suspense>
   );
 }
