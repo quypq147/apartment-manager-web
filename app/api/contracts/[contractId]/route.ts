@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-interface RouteContext {
-  params: {
-    contractId: string;
-  };
-}
-
 interface AsyncRouteContext {
   params: Promise<{
     contractId: string;
@@ -19,7 +13,7 @@ interface ExtendContractBody {
 }
 
 // GET: Xem chi tiết hợp đồng và tất cả hóa đơn liên quan
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(request: NextRequest, context: AsyncRouteContext) {
   try {
     const currentUser = await getCurrentUser();
     const userId = currentUser?.id ?? request.headers.get("x-user-id");
@@ -32,8 +26,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const resolvedParams = await Promise.resolve(context.params);
-    const { contractId } = resolvedParams;
+    const { contractId } = await context.params;
     if (!contractId) {
       return NextResponse.json(
         { success: false, error: "contractId is required" },
@@ -161,7 +154,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 // PATCH: Gia hạn hợp đồng (extend endDate)
-export async function PATCH(request: NextRequest, context: RouteContext) {
+export async function PATCH(request: NextRequest, context: AsyncRouteContext) {
   try {
     const currentUser = await getCurrentUser();
     const userId = currentUser?.id ?? request.headers.get("x-user-id");
@@ -174,8 +167,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const resolvedParams = await Promise.resolve(context.params);
-    const { contractId } = resolvedParams;
+    const { contractId } = await context.params;
     if (!contractId) {
       return NextResponse.json(
         { success: false, error: "contractId is required" },
