@@ -65,8 +65,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ownedProperties Property[] @relation("LandlordProperties")
-  contracts       Contract[] @relation("TenantContracts")
+  ownedProperties      Property[] @relation("LandlordProperties")
+  contracts            Contract[] @relation("TenantContracts")
+  resetPasswordToken   String?    @unique
+  resetPasswordExpires DateTime?
 }
 
 model Property {

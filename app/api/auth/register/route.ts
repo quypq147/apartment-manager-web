@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { generateNextUserId } from "@/lib/user-id";
+import { hashPassword } from "@/lib/password";
 
 interface RegisterBody {
   email: string;
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = await generateNextUserId(prisma, "LANDLORD");
+    const hashedPassword = await hashPassword(password.trim());
     const now = new Date();
 
     // Create new user (LANDLORD for new registrations)
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
       data: {
         id: userId,
         email: email.trim().toLowerCase(),
-        password: password.trim(), // In production, hash this with bcryptjs
+        password: hashedPassword,
         name: name.trim(),
         phone: phone?.trim() || null,
         role: "LANDLORD", // New users are landlords by default

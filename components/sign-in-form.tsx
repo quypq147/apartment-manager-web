@@ -91,6 +91,11 @@ export function SignInForm() {
           required
           disabled={loading}
         />
+        <div className="mt-2 text-right">
+          <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">
+            Quên mật khẩu?
+          </Link>
+        </div>
       </div>
 
       <button

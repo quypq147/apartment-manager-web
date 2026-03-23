@@ -67,6 +67,8 @@ model User {
 
   ownedProperties Property[] @relation("LandlordProperties")
   contracts       Contract[] @relation("TenantContracts")
+  resetPasswordToken String?   @unique
+  resetPasswordExpires DateTime?
 }
 
 model Property {

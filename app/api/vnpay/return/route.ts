@@ -20,20 +20,27 @@ function extractInvoiceIdFromTxnRef(txnRef: string | null) {
 }
 
 export async function GET(request: NextRequest) {
-  const params: Record<string, string> = {};
+  const allParams: Record<string, string> = {};
+  const vnpParams: Record<string, string> = {};
+
   for (const [key, value] of request.nextUrl.searchParams.entries()) {
-    params[key] = value;
+    allParams[key] = value;
+    if (
+      key.startsWith("vnp_") &&
+      key !== "vnp_SecureHash" &&
+      key !== "vnp_SecureHashType"
+    ) {
+      vnpParams[key] = value;
+    }
   }
 
-  const secureHash = params.vnp_SecureHash;
-  delete params.vnp_SecureHash;
-  delete params.vnp_SecureHashType;
+  const secureHash = allParams.vnp_SecureHash;
 
-  const responseCode = params.vnp_ResponseCode ?? "99";
-  const txnRef = params.vnp_TxnRef ?? null;
+  const responseCode = vnpParams.vnp_ResponseCode ?? "99";
+  const txnRef = vnpParams.vnp_TxnRef ?? null;
   const invoiceId = extractInvoiceIdFromTxnRef(txnRef);
-  const paidAmount = Number(params.vnp_Amount) / 100;
-  const redirectTarget = params.redirectTo;
+  const paidAmount = Number(vnpParams.vnp_Amount) / 100;
+  const redirectTarget = allParams.redirectTo;
 
   const targetPath = redirectTarget === "dashboard" ? "/dashboard/tenant" : "/dashboard/tenant/invoices";
   const targetUrl = new URL(targetPath, request.nextUrl.origin);
@@ -48,7 +55,7 @@ export async function GET(request: NextRequest) {
     return redirectWith302(targetUrl);
   }
 
-  const sortedParams = sortObject(params);
+  const sortedParams = sortObject(vnpParams);
   const signData = buildVnpayQuery(sortedParams);
   const expectedHash = generateVnpaySignature(signData, process.env.VNPAY_HASH_SECRET);
 
@@ -122,7 +129,8 @@ export async function GET(request: NextRequest) {
           });
         });
       }
-    } catch {
+    } catch (error) {
+      console.error("GET /api/vnpay/return error", error);
       targetUrl.searchParams.set("payment", "failed");
       targetUrl.searchParams.set("code", "99");
       if (invoiceId) {

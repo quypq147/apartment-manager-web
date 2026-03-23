@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verifyPassword } from "@/lib/password";
 
 interface LoginBody {
   email: string;
@@ -31,8 +32,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check password (simple comparison - in production use bcryptjs)
-    if (user.password !== password.trim()) {
+    // Check password (supports both legacy plain text and bcrypt hash)
+    const isValidPassword = await verifyPassword(password.trim(), user.password);
+    if (!isValidPassword) {
       return NextResponse.json(
         { success: false, error: "Invalid email or password" },
         { status: 401 }

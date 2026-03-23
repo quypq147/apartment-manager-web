@@ -15,14 +15,20 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const incomingParams: Record<string, string> = {};
+    const vnpParams: Record<string, string> = {};
 
     for (const [key, value] of searchParams.entries()) {
       incomingParams[key] = value;
+      if (
+        key.startsWith("vnp_") &&
+        key !== "vnp_SecureHash" &&
+        key !== "vnp_SecureHashType"
+      ) {
+        vnpParams[key] = value;
+      }
     }
 
     const secureHash = incomingParams.vnp_SecureHash;
-    delete incomingParams.vnp_SecureHash;
-    delete incomingParams.vnp_SecureHashType;
 
     if (!secureHash) {
       return NextResponse.json({ RspCode: "97", Message: "Checksum failed" });
@@ -33,7 +39,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ RspCode: "99", Message: "Missing secret key" });
     }
 
-    const sortedParams = sortObject(incomingParams);
+    const sortedParams = sortObject(vnpParams);
     const signData = buildVnpayQuery(sortedParams);
     const expectedHash = generateVnpaySignature(signData, secretKey);
 
@@ -41,9 +47,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ RspCode: "97", Message: "Checksum failed" });
     }
 
-    const txnRef = incomingParams.vnp_TxnRef;
-    const responseCode = incomingParams.vnp_ResponseCode;
-    const paidAmount = Number(incomingParams.vnp_Amount) / 100;
+    const txnRef = vnpParams.vnp_TxnRef;
+    const responseCode = vnpParams.vnp_ResponseCode;
+    const paidAmount = Number(vnpParams.vnp_Amount) / 100;
 
     if (!txnRef || Number.isNaN(paidAmount) || paidAmount <= 0) {
       return NextResponse.json({ RspCode: "99", Message: "Invalid payload" });
