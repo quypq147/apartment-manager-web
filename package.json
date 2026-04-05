@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:headed": "playwright test --headed",
+    "test:auth": "playwright test tests/e2e/auth.spec.ts",
+    "test:owner": "playwright test tests/e2e/owner-*.spec.ts",
+    "test:tenant": "playwright test tests/e2e/tenant-invoices.spec.ts",
+    "test:ai": "playwright test tests/e2e/ai-chatbot.spec.ts",
+    "db:seed": "node -r tsx tests/utils/seed-runner.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
@@ -26,6 +36,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@prisma/client": "^7.5.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
