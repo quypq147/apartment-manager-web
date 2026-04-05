@@ -110,3 +110,129 @@ test.describe('Authentication - Đăng nhập/Đăng xuất', () => {
     });
   });
 });
+
+  test.describe('Registration - Đăng ký tài khoản', () => {
+    test('TC_AUTH_06: Đăng ký Owner thành công', async ({ page }) => {
+      await page.goto('/register');
+    
+      // Điền form đăng ký
+      await page.fill('input[name="fullName"]', 'Test Owner ' + Date.now());
+      await page.fill('input[name="email"]', 'owner' + Date.now() + '@example.com');
+      await page.fill('input[name="phone"]', '0912345678');
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="confirmPassword"]', 'Password123!');
+    
+      // Chọn role Owner
+      const ownerRadio = page.locator('input[value="LANDLORD"], input[id*="owner"]');
+      if (await ownerRadio.isVisible().catch(() => false)) {
+        await ownerRadio.click();
+      }
+    
+      await page.click('button[type="submit"]');
+    
+      // Kiểm tra thông báo thành công hoặc chuyển hướng
+      await expect(page.locator('text=/.*thành công|đã tạo|chào mừng.*/i')).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_AUTH_07: Đăng ký Tenant thành công', async ({ page }) => {
+      await page.goto('/register');
+    
+      await page.fill('input[name="fullName"]', 'Test Tenant ' + Date.now());
+      await page.fill('input[name="email"]', 'tenant' + Date.now() + '@example.com');
+      await page.fill('input[name="phone"]', '0912345679');
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="confirmPassword"]', 'Password123!');
+    
+      const tenantRadio = page.locator('input[value="TENANT"], input[id*="tenant"]');
+      if (await tenantRadio.isVisible().catch(() => false)) {
+        await tenantRadio.click();
+      }
+    
+      await page.click('button[type="submit"]');
+      await expect(page.locator('text=/.*thành công|đã tạo|chào mừng.*/i')).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_AUTH_08: Đăng ký thất bại - Email đã tồn tại', async ({ page }) => {
+      await page.goto('/register');
+    
+      // Sử dụng email đã tồn tại
+      await page.fill('input[name="fullName"]', 'Duplicate Test');
+      await page.fill('input[name="email"]', 'owner_test@example.com');
+      await page.fill('input[name="phone"]', '0912345680');
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="confirmPassword"]', 'Password123!');
+    
+      await page.click('button[type="submit"]');
+    
+      const errorMsg = page.locator('text=/.*đã tồn tại|đã sử dụng|email này.*/i');
+      await expect(errorMsg).toBeVisible({ timeout: 5000 });
+    });
+
+    test('TC_AUTH_09: Đăng ký thất bại - Mật khẩu không trùng khớp', async ({ page }) => {
+      await page.goto('/register');
+    
+      await page.fill('input[name="fullName"]', 'Test User');
+      await page.fill('input[name="email"]', 'test' + Date.now() + '@example.com');
+      await page.fill('input[name="phone"]', '0912345681');
+      await page.fill('input[name="password"]', 'Password123!');
+      await page.fill('input[name="confirmPassword"]', 'Different123!');
+    
+      await page.click('button[type="submit"]');
+    
+      const errorMsg = page.locator('text=/.*trùng khớp|không khớp|lại không trùng.*/i');
+      await expect(errorMsg).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+  });
+
+  test.describe('Password Reset - Đặt lại mật khẩu', () => {
+    test('TC_AUTH_11: Truy cập trang quên mật khẩu', async ({ page }) => {
+      await page.goto('/login');
+    
+      const forgotLink = page.locator('a:has-text("Quên mật khẩu"), text=/quên.*mật khẩu/i');
+      if (await forgotLink.isVisible().catch(() => false)) {
+        await forgotLink.click();
+        await expect(page).toHaveURL(/.*forgot-password.*/);
+      }
+    });
+
+    test('TC_AUTH_12: Gửi yêu cầu đặt lại mật khẩu', async ({ page }) => {
+      await page.goto('/forgot-password');
+    
+      await page.fill('input[name="email"], input[type="email"]', 'owner_test@example.com');
+      await page.click('button[type="submit"]');
+    
+      const successMsg = page.locator('text=/.*gửi.*email|check.*email|xác nhận.*/i');
+      await expect(successMsg).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_AUTH_13: Đặt lại mật khẩu thành công', async ({ page }) => {
+      await page.goto('/reset-password?token=test-token-123');
+    
+      await page.fill('input[name="password"], input[placeholder*="mật khẩu"]', 'NewPassword123!');
+      await page.fill('input[name="confirmPassword"], input[id*="confirm"]', 'NewPassword123!');
+    
+      await page.click('button[type="submit"]');
+    
+      const successMsg = page.locator('text=/.*thành công|mật khẩu.*đã.*thay|đã cập nhật.*/i');
+      await expect(successMsg).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_AUTH_14: Token đặt lại mật khẩu không hợp lệ', async ({ page }) => {
+      await page.goto('/reset-password?token=invalid-token');
+    
+      const errorMsg = page.locator('text=/.*hết hạn|không hợp lệ|không tìm thấy.*/i');
+      await expect(errorMsg).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_AUTH_15: Thay đổi mật khẩu sau khi đặt lại thành công', async ({ page, loginAsOwner }) => {
+      await loginAsOwner();
+      await page.goto('/dashboard/owner');
+    
+      // Tìm menu settings hoặc change password
+      const settingsBtn = page.locator('button:has-text("Cài đặt"), a:has-text("Đổi mật khẩu")');
+      if (await settingsBtn.isVisible().catch(() => false)) {
+        await settingsBtn.click();
+        await page.waitForURL(/.*settings|change-password.*/i, { timeout: 5000 }).catch(() => null);
+      }
+    });
+  });

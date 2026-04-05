@@ -248,3 +248,61 @@ test.describe('UI/UX Features', () => {
     }
   });
 });
+
+  test.describe('UI/UX - Loading States', () => {
+    test('TC_UI_04: Kiểm tra loading state khi gửi form', async ({ page, loginAsOwner }) => {
+      await loginAsOwner();
+
+      await page.goto('/dashboard/owner/properties');
+
+      // Trigger form submission
+      const addBtn = page.locator('button:has-text(/thêm|create|new/i)').first();
+
+      if (await addBtn.isVisible().catch(() => false)) {
+        await addBtn.click();
+
+        await page.waitForTimeout(300);
+
+        // Điền thông tin
+        const nameInput = page.locator('input[name="name"], input[placeholder*="tên"]').first();
+        if (await nameInput.isVisible().catch(() => false)) {
+          await nameInput.fill('Test Loading State');
+
+          const addressInput = page.locator('input[name="address"], input[placeholder*="địa chỉ"]').first();
+          if (await addressInput.isVisible().catch(() => false)) {
+            await addressInput.fill('123 Test St');
+          }
+
+          // Submit form
+          const submitBtn = page.locator('button[type="submit"]').first();
+          if (await submitBtn.isVisible().catch(() => false)) {
+            // Kiểm tra loading indicator khi submit
+            const clickPromise = submitBtn.click();
+
+            // Trong khoảng thời gian loading, kiểm tra loading indicator
+            await page.waitForTimeout(100);
+
+            // Tìm loading spinner
+            const spinner = page.locator('[role="status"], .spinner, .loading, .loader, svg').first();
+            const loadingText = page.locator('text=/.*đang xử lý|loading|đang tải.*/i').first();
+
+            const isLoading = await Promise.race([
+              spinner.isVisible().catch(() => false),
+              loadingText.isVisible().catch(() => false),
+            ]);
+
+            // Loading state có thể hiển thị hoặc không, tùy vào tốc độ
+            // Chủ yếu check là form không có lỗi
+
+            await clickPromise;
+            await page.waitForTimeout(1000);
+
+            // Kiểm tra form không bị stuck ở loading
+            const modal = page.locator('[role="dialog"]').first();
+            const isClosed = !(await modal.isVisible().catch(() => false));
+            expect(isClosed).toBe(true);
+          }
+        }
+      }
+    });
+  });

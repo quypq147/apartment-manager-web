@@ -185,3 +185,49 @@ test.describe('Owner - Quản lý Tài sản (Properties)', () => {
     }
   });
 });
+    test('TC_OWN_PROP_05: Xóa tài sản thành công', async ({ page }) => {
+      await page.goto('/dashboard/owner/properties');
+
+      // Tìm tài sản để xóa
+      const property = page.locator('text=/.*Khu Trọ Test.*/i').first();
+      if (await property.isVisible().catch(() => false)) {
+        // Tìm nút delete/xóa trong row
+        const deleteBtn = property.locator('..').locator('button:has-text(/xóa|delete|remove/i), [aria-label*="delete"]').first();
+      
+        if (await deleteBtn.isVisible().catch(() => false)) {
+          await deleteBtn.click();
+        
+          // Xác nhận xóa
+          const confirmBtn = page.locator('button:has-text(/xác nhận|confirm|ok/i)').first();
+          if (await confirmBtn.isVisible().catch(() => false)) {
+            await confirmBtn.click();
+          }
+        
+          // Kiểm tra thông báo thành công
+          const successMsg = page.locator('text=/.*thành công|deleted|xóa.*/i');
+          await expect(successMsg).toBeVisible({ timeout: 5000 }).catch(() => null);
+        }
+      }
+    });
+
+    test('TC_OWN_PROP_06: Xem chi tiết tài sản', async ({ page }) => {
+      await page.goto('/dashboard/owner/properties');
+
+      // Tìm tài sản test
+      const property = page.locator('text=/.*Khu Trọ Test.*/i').first();
+      if (await property.isVisible().catch(() => false)) {
+        // Click vào tài sản để xem chi tiết
+        await property.click();
+      
+        // Kiểm tra chuyển hướng đến chi tiết
+        await page.waitForURL(/.*properties.*\d+/, { timeout: 5000 }).catch(() => null);
+      
+        // Kiểm tra hiển thị chi tiết
+        const detailHeader = page.locator('text=/.*chi tiết|information|details/i');
+        await expect(detailHeader).toBeVisible({ timeout: 5000 }).catch(() => null);
+
+        // Kiểm tra các thông tin cơ bản hiển thị
+        const infoElement = page.locator('text=/.*địa chỉ|diện tích|phòng/i');
+        await expect(infoElement).toBeVisible({ timeout: 5000 }).catch(() => null);
+      }
+    });

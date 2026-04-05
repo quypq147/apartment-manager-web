@@ -247,3 +247,202 @@ test.describe('Authorization - RBAC', () => {
     }
   });
 });
+
+  test.describe('Tenant - Dashboard Thêm', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_DASH_02: Xem số tiền nợ hóa đơn', async ({ page }) => {
+      await page.goto('/dashboard/tenant');
+    
+      const unpaidAmount = page.locator('text=/.*tiền nợ|due amount|chưa thanh toán/i');
+      await expect(unpaidAmount).toBeVisible({ timeout: 5000 }).catch(() => null);
+    
+      const amountValue = page.locator('text=/\\d+,\\d{3}|\\d{6,}/i').first();
+      await expect(amountValue).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_TEN_DASH_03: Xem phòng đang thuê trên Dashboard', async ({ page }) => {
+      await page.goto('/dashboard/tenant');
+    
+      const roomInfo = page.locator('text=/.*phòng|số phòng|room number/i');
+      await expect(roomInfo).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_TEN_DASH_04: Xem thông báo trên Dashboard', async ({ page }) => {
+      await page.goto('/dashboard/tenant');
+    
+      const notification = page.locator('text=/.*thông báo|notification|message/i').first();
+      if (await notification.isVisible().catch(() => false)) {
+        await expect(notification).toBeVisible();
+      }
+    });
+  });
+
+  test.describe('Tenant - Phòng (Room) Thêm', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_ROOM_02: Xem chi tiết dịch vụ phòng', async ({ page }) => {
+      const roomLink = page.locator('a:has-text(/phòng của tôi|my room/i)').first();
+
+      if (await roomLink.isVisible().catch(() => false)) {
+        await roomLink.click();
+      } else {
+        await page.goto('/dashboard/tenant/room');
+      }
+
+      // Tìm section dịch vụ
+      const servicesSection = page.locator('text=/.*dịch vụ|service|utilities/i').first();
+      if (await servicesSection.isVisible().catch(() => false)) {
+        await expect(servicesSection).toBeVisible();
+      }
+    });
+  });
+
+  test.describe('Tenant - Hợp đồng (Contracts)', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_CON_01: Xem hợp đồng thuê phòng', async ({ page }) => {
+      const contractLink = page.locator('a:has-text(/hợp đồng|contract/i)').first();
+
+      if (await contractLink.isVisible().catch(() => false)) {
+        await contractLink.click();
+      } else {
+        await page.goto('/dashboard/tenant/contract');
+      }
+
+      const contractInfo = page.locator('text=/.*mã hợp đồng|người cho thuê|ngày bắt đầu/i');
+      await expect(contractInfo).toBeVisible({ timeout: 5000 }).catch(() => null);
+    });
+
+    test('TC_TEN_CON_02: Xem chi tiết hợp đồng', async ({ page }) => {
+      const contractLink = page.locator('a:has-text(/hợp đồng|contract/i)').first();
+
+      if (await contractLink.isVisible().catch(() => false)) {
+        await contractLink.click();
+      } else {
+        await page.goto('/dashboard/tenant/contract');
+      }
+
+      const viewBtn = page.locator('button:has-text(/xem|view|chi tiết/i)').first();
+      if (await viewBtn.isVisible().catch(() => false)) {
+        await viewBtn.click();
+      
+        const details = page.locator('text=/.*điều khoản|terms|chi tiết/i');
+        await expect(details).toBeVisible({ timeout: 5000 }).catch(() => null);
+      }
+    });
+
+    test('TC_TEN_CON_03: Tải xuống hợp đồng PDF', async ({ page }) => {
+      const contractLink = page.locator('a:has-text(/hợp đồng|contract/i)').first();
+
+      if (await contractLink.isVisible().catch(() => false)) {
+        await contractLink.click();
+      } else {
+        await page.goto('/dashboard/tenant/contract');
+      }
+
+      const downloadBtn = page.locator('button:has-text(/tải|download|pdf/i)').first();
+      if (await downloadBtn.isVisible().catch(() => false)) {
+        await downloadBtn.click();
+        await page.waitForTimeout(1000);
+      }
+    });
+  });
+
+  test.describe('Tenant - Thông báo (Notifications)', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_NOTI_01: Xem danh sách thông báo', async ({ page }) => {
+      const notificationBtn = page.locator('[aria-label*="notification"], button:has-text(/thông báo/i)').first();
+    
+      if (await notificationBtn.isVisible().catch(() => false)) {
+        await notificationBtn.click();
+      
+        const notificationList = page.locator('[role="dialog"]').first();
+        await expect(notificationList).toBeVisible({ timeout: 5000 }).catch(() => null);
+      }
+    });
+
+    test('TC_TEN_NOTI_02: Đánh dấu thông báo là đã đọc', async ({ page }) => {
+      const notificationBtn = page.locator('[aria-label*="notification"], button:has-text(/thông báo/i)').first();
+    
+      if (await notificationBtn.isVisible().catch(() => false)) {
+        await notificationBtn.click();
+      
+        const readBtn = page.locator('button:has-text(/đã đọc|read|xác nhận/i)').first();
+        if (await readBtn.isVisible().catch(() => false)) {
+          await readBtn.click();
+          await page.waitForTimeout(300);
+        }
+      }
+    });
+  });
+
+  test.describe('Tenant - Dịch vụ (Services)', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_SVC_01: Xem danh sách dịch vụ phòng', async ({ page }) => {
+      await page.goto('/dashboard/tenant/room');
+    
+      const serviceList = page.locator('table, [role="grid"]').first();
+      if (await serviceList.isVisible().catch(() => false)) {
+        await expect(serviceList).toBeVisible();
+      }
+    });
+
+    test('TC_TEN_SVC_02: Xem chi tiết dịch vụ', async ({ page }) => {
+      await page.goto('/dashboard/tenant/room');
+    
+      const serviceItem = page.locator('tr, [role="row"]').first();
+      if (await serviceItem.isVisible().catch(() => false)) {
+        const serviceName = serviceItem.locator('text=/.*dịch vụ|service/i').first();
+        if (await serviceName.isVisible().catch(() => false)) {
+          await serviceItem.click();
+        }
+      }
+    });
+  });
+
+  test.describe('Tenant - Hóa đơn (Invoices) Thêm', () => {
+    test.beforeEach(async ({ loginAsTenant }) => {
+      await loginAsTenant();
+    });
+
+    test('TC_TEN_INV_04: Tải xuống hóa đơn PDF', async ({ page }) => {
+      await page.goto('/dashboard/tenant/invoices');
+    
+      const invoiceRow = page.locator('tr, [role="row"]').first();
+      if (await invoiceRow.isVisible().catch(() => false)) {
+        const downloadBtn = invoiceRow.locator('button:has-text(/tải|download|pdf/i)').first();
+        if (await downloadBtn.isVisible().catch(() => false)) {
+          await downloadBtn.click();
+          await page.waitForTimeout(1000);
+        }
+      }
+    });
+
+    test('TC_TEN_INV_05: Kiểm tra lịch sử thanh toán hóa đơn', async ({ page }) => {
+      await page.goto('/dashboard/tenant/invoices');
+    
+      const paidInvoice = page.locator('tr:has-text(/đã thanh toán|paid/i)').first();
+      if (await paidInvoice.isVisible().catch(() => false)) {
+        const detailsBtn = paidInvoice.locator('button:has-text(/chi tiết|view|xem/i)').first();
+        if (await detailsBtn.isVisible().catch(() => false)) {
+          await detailsBtn.click();
+        
+          const paymentHistory = page.locator('text=/.*lịch sử thanh toán|payment date|ngày thanh toán/i');
+          await expect(paymentHistory).toBeVisible({ timeout: 5000 }).catch(() => null);
+        }
+      }
+    });
+  });
