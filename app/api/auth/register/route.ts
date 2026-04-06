@@ -8,7 +8,10 @@ interface RegisterBody {
   password: string;
   name: string;
   phone?: string;
+  role?: string;
 }
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!email.includes("@")) {
+    if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { success: false, error: "Invalid email format" },
         { status: 400 }
@@ -49,7 +52,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RegisterBody;
-    const { email, password, name, phone } = body;
+    const { email, password, name, phone, role } = body;
 
     // Validate input
     if (!email?.trim() || !password?.trim() || !name?.trim()) {
@@ -66,9 +69,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!email.includes("@")) {
+    if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
         { success: false, error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof role === "string" && role !== "LANDLORD" && role !== "TENANT") {
+      return NextResponse.json(
+        { success: false, error: "Invalid role" },
         { status: 400 }
       );
     }
@@ -97,7 +107,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name: name.trim(),
         phone: phone?.trim() || null,
-        role: "LANDLORD", // New users are landlords by default
+        role: role === "TENANT" ? "TENANT" : "LANDLORD", // Default registration is landlord
         createdAt: now,
         updatedAt: now,
       },

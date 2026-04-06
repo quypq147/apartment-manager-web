@@ -18,6 +18,90 @@ interface CreateContractBody {
   notes?: string;
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const currentUser = await getCurrentUser();
+    const userId = currentUser?.id ?? request.headers.get("x-user-id");
+    const userRole = currentUser?.role ?? request.headers.get("x-user-role");
+
+    if (!userId || !userRole || !["LANDLORD", "TENANT", "ADMIN"].includes(userRole)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const status = request.nextUrl.searchParams.get("status") ?? undefined;
+
+    if (status && !["ACTIVE", "EXPIRED", "TERMINATED"].includes(status)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid status" },
+        { status: 400 }
+      );
+    }
+
+    const where =
+      userRole === "LANDLORD"
+        ? {
+            room: {
+              property: {
+                landlordId: userId,
+              },
+            },
+            ...(status ? { status: status as "ACTIVE" | "EXPIRED" | "TERMINATED" } : {}),
+          }
+        : userRole === "TENANT"
+          ? {
+              tenantId: userId,
+              ...(status ? { status: status as "ACTIVE" | "EXPIRED" | "TERMINATED" } : {}),
+            }
+          : {
+              ...(status ? { status: status as "ACTIVE" | "EXPIRED" | "TERMINATED" } : {}),
+            };
+
+    const contracts = await prisma.contract.findMany({
+      where,
+      include: {
+        room: {
+          include: {
+            property: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+              },
+            },
+          },
+        },
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            cccd: true,
+          },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }],
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: contracts,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("GET /api/contracts error", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();

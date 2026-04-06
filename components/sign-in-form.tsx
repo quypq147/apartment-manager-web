@@ -44,6 +44,9 @@ export function SignInForm() {
         router.push("/dashboard/tenant");
       } else if (userData.role === "ADMIN") {
         router.push("/dashboard/admin");
+      } else {
+        setError("Vai trò tài khoản không hợp lệ");
+        setLoading(false);
       }
     } catch {
       setError("Lỗi kết nối");
