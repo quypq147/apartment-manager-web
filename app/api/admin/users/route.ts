@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
         email: true,
         phone: true,
         role: true,
+        landlordApprovalStatus: true,
         createdAt: true,
         _count: {
           select: {
@@ -46,16 +47,22 @@ export async function GET(request: NextRequest) {
       orderBy: [{ createdAt: "desc" }],
     });
 
-    const data = users.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      createdAt: user.createdAt,
-      propertiesCount: user._count.ownedProperties,
-      status: user._count.ownedProperties > 0 ? "ACTIVE" : "PENDING_VERIFICATION",
-    }));
+    const data = users.map((user) => {
+      const landlordStatus =
+        user.landlordApprovalStatus ??
+        (user._count.ownedProperties > 0 ? "ACTIVE" : "PENDING_VERIFICATION");
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt,
+        propertiesCount: user._count.ownedProperties,
+        status: user.role === "LANDLORD" ? landlordStatus : "ACTIVE",
+      };
+    });
 
     return NextResponse.json(
       {

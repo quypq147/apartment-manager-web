@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 interface RouteContext {
   params: Promise<{
@@ -28,6 +29,28 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
+
+    const landlord = await prisma.user.findUnique({
+      where: { id: landlordId },
+      select: {
+        id: true,
+        role: true,
+      },
+    });
+
+    if (!landlord || landlord.role !== "LANDLORD") {
+      return NextResponse.json(
+        { success: false, error: "Landlord not found" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.user.update({
+      where: { id: landlordId },
+      data: {
+        landlordApprovalStatus: "ACTIVE",
+      },
+    });
 
     return NextResponse.json(
       {

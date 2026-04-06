@@ -18,6 +18,7 @@ export function SignUpForm() {
     phone: "",
     password: "",
     confirmPassword: "",
+    role: "LANDLORD",
   });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -57,6 +58,7 @@ export function SignUpForm() {
           email: formData.email,
           phone: formData.phone || undefined,
           password: formData.password,
+          role: formData.role,
         }),
       });
 
@@ -114,6 +116,23 @@ export function SignUpForm() {
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Vai trò
+        </label>
+        <select
+          value={formData.role}
+          onChange={(event) =>
+            setFormData((prev) => ({ ...prev, role: event.target.value }))
+          }
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all bg-white"
+          disabled={loading}
+        >
+          <option value="LANDLORD">Chủ trọ</option>
+          <option value="TENANT">Khách thuê</option>
+        </select>
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
