@@ -1,6 +1,4 @@
-import { test as base, Page } from '@playwright/test';
-
-type AuthRole = 'owner' | 'tenant' | 'admin';
+import { expect, test as base } from '@playwright/test';
 
 interface AuthFixture {
   loginAsOwner: () => Promise<void>;
@@ -10,61 +8,70 @@ interface AuthFixture {
   logout: () => Promise<void>;
 }
 
+async function doLogin(
+  page: import('@playwright/test').Page,
+  email: string,
+  password: string,
+  targetPath: string
+) {
+  await page.context().clearCookies();
+
+  let response: import('@playwright/test').APIResponse | null = null;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      response = await page.request.post('/api/auth/login', {
+        data: { email, password },
+      });
+      if (response.ok()) {
+        break;
+      }
+      lastError = new Error(`Login API failed: ${response.status()} ${response.statusText()}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (!response || !response.ok()) {
+    throw lastError instanceof Error ? lastError : new Error(`Login failed for ${email}`);
+  }
+
+  await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveURL(new RegExp(targetPath), { timeout: 20000 });
+}
+
 export const test = base.extend<AuthFixture>({
   loginAsOwner: async ({ page }, use) => {
-    const login = async () => {
-      await page.goto('/login');
-      await page.fill('input[type="email"]', 'owner_test@example.com');
-      await page.fill('input[type="password"]', 'password123');
-      await page.click('button[type="submit"]');
-      await page.waitForURL(/.*\/dashboard\/owner.*/);
-    };
-    await use(login);
+    await use(async () => {
+      await doLogin(page, 'owner_test@example.com', 'password123', '/dashboard/owner');
+    });
   },
 
   loginAsTenant: async ({ page }, use) => {
-    const login = async () => {
-      await page.goto('/login');
-      await page.fill('input[type="email"]', 'tenant_test@example.com');
-      await page.fill('input[type="password"]', 'password123');
-      await page.click('button[type="submit"]');
-      await page.waitForURL(/.*\/dashboard\/tenant.*/);
-    };
-    await use(login);
+    await use(async () => {
+      await doLogin(page, 'tenant_test@example.com', 'password123', '/dashboard/tenant');
+    });
   },
 
   loginAsAdmin: async ({ page }, use) => {
-    const login = async () => {
-      await page.goto('/login');
-      await page.fill('input[type="email"]', 'admin_test@example.com');
-      await page.fill('input[type="password"]', 'password123');
-      await page.click('button[type="submit"]');
-      await page.waitForURL(/.*\/dashboard\/admin.*/);
-    };
-    await use(login);
+    await use(async () => {
+      await doLogin(page, 'admin_test@example.com', 'password123', '/dashboard/admin');
+    });
   },
 
   loginAs: async ({ page }, use) => {
-    const login = async (email: string, password: string) => {
-      await page.goto('/login');
-      await page.fill('input[type="email"]', email);
-      await page.fill('input[type="password"]', password);
-      await page.click('button[type="submit"]');
-      // Chờ cho tới khi mở được dashboard (bất kỳ loại nào)
-      await page.waitForURL(/.*\/dashboard\/.*/);
-    };
-    await use(login);
+    await use(async (email: string, password: string) => {
+      await doLogin(page, email, password, '/dashboard');
+    });
   },
 
   logout: async ({ page }, use) => {
-    const logout = async () => {
-      // Click avatar/menu dropdown
-      await page.click('[role="button"]:has-text("Menu tài khoản")', { timeout: 5000 }).catch(() => null);
-      // Hoặc tìm cách logout khác, ví dụ navigate trực tiếp
-      await page.goto('/api/auth/logout', { waitUntil: 'networkidle' }).catch(() => null);
+    await use(async () => {
+      await page.request.post('/api/auth/logout');
       await page.goto('/login');
-    };
-    await use(logout);
+      await expect(page).toHaveURL(/\/login/);
+    });
   },
 });
 
