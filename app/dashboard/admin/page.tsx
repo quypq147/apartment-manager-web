@@ -1,7 +1,7 @@
 // app/dashboard/admin/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -9,79 +9,152 @@ import {
   TrendingUp,
   CheckCircle,
   AlertCircle,
-  MoreHorizontal,
 } from "lucide-react";
+
+type LandlordStatus = "ACTIVE" | "PENDING_VERIFICATION" | "REJECTED";
+
+type Landlord = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  createdAt: string;
+  propertiesCount: number;
+  status: LandlordStatus;
+};
+
+type AdminOverviewResponse = {
+  success: boolean;
+  error?: string;
+  data?: {
+    kpis: {
+      totalLandlords: number;
+      totalTenants: number;
+      totalProperties: number;
+      platformRevenue: number;
+    };
+  };
+};
+
+type LandlordsResponse = {
+  success: boolean;
+  error?: string;
+  data?: Landlord[];
+};
 
 export default function AdminDashboard() {
   const [landlordFilter, setLandlordFilter] = useState<string>("pending");
+  const [kpiData, setKpiData] = useState({
+    totalLandlords: 0,
+    totalTenants: 0,
+    totalProperties: 0,
+    platformRevenue: 0,
+  });
+  const [landlords, setLandlords] = useState<Landlord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  // Mock data - later replace with actual data from API
-  const kpiData = {
-    totalLandlords: 45,
-    totalTenants: 287,
-    totalProperties: 68,
-    platformRevenue: 2450000,
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [overviewRes, landlordsRes] = await Promise.all([
+          fetch("/api/admin/overview"),
+          fetch("/api/admin/landlords"),
+        ]);
+
+        const overviewJson = (await overviewRes.json()) as AdminOverviewResponse;
+        const landlordsJson = (await landlordsRes.json()) as LandlordsResponse;
+
+        if (!overviewRes.ok || !overviewJson.success) {
+          throw new Error(overviewJson.error || "Không thể tải dữ liệu tổng quan.");
+        }
+
+        if (!landlordsRes.ok || !landlordsJson.success) {
+          throw new Error(landlordsJson.error || "Không thể tải danh sách chủ trọ.");
+        }
+
+        setKpiData(
+          overviewJson.data?.kpis ?? {
+            totalLandlords: 0,
+            totalTenants: 0,
+            totalProperties: 0,
+            platformRevenue: 0,
+          }
+        );
+        setLandlords(landlordsJson.data ?? []);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "Đã có lỗi xảy ra.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadData();
+  }, []);
+
+  const pendingLandlords = useMemo(
+    () => landlords.filter((item) => item.status === "PENDING_VERIFICATION"),
+    [landlords]
+  );
+  const activeLandlords = useMemo(
+    () => landlords.filter((item) => item.status === "ACTIVE"),
+    [landlords]
+  );
+
+  const displayLandlords = landlordFilter === "pending" ? pendingLandlords : activeLandlords;
+
+  const updateLandlordStatus = async (landlordId: string, status: LandlordStatus) => {
+    setActionError(null);
+    setActionLoadingId(landlordId);
+
+    try {
+      const endpoint =
+        status === "ACTIVE"
+          ? `/api/admin/landlords/${landlordId}/verify`
+          : `/api/admin/landlords/${landlordId}`;
+
+      const response = await fetch(endpoint, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: status === "ACTIVE" ? undefined : JSON.stringify({ status }),
+      });
+
+      const result = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Không thể cập nhật trạng thái chủ trọ.");
+      }
+
+      setLandlords((prev) =>
+        prev.map((item) =>
+          item.id === landlordId
+            ? {
+                ...item,
+                status,
+              }
+            : item
+        )
+      );
+    } catch (updateError) {
+      setActionError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Không thể cập nhật trạng thái chủ trọ."
+      );
+    } finally {
+      setActionLoadingId(null);
+    }
   };
-
-  const pendingLandlords = [
-    {
-      id: "LL001",
-      name: "Trần Văn B",
-      email: "tranvanb@email.com",
-      phone: "0912345678",
-      properties: 3,
-      createdDate: "2026-03-01",
-      status: "PENDING_VERIFICATION",
-    },
-    {
-      id: "LL002",
-      name: "Lê Thị C",
-      email: "lethic@email.com",
-      phone: "0987654321",
-      properties: 5,
-      createdDate: "2026-02-28",
-      status: "PENDING_VERIFICATION",
-    },
-  ];
-
-  const activeLandlords = [
-    {
-      id: "LL003",
-      name: "Nguyễn Văn A",
-      email: "nguyenvana@email.com",
-      phone: "0901234567",
-      properties: 8,
-      tenants: 24,
-      monthlyRevenue: 42000000,
-      status: "ACTIVE",
-      joinDate: "2025-01-15",
-    },
-    {
-      id: "LL004",
-      name: "Phạm Thị D",
-      email: "phamthid@email.com",
-      phone: "0923456789",
-      properties: 4,
-      tenants: 12,
-      monthlyRevenue: 18500000,
-      status: "ACTIVE",
-      joinDate: "2025-02-01",
-    },
-    {
-      id: "LL005",
-      name: "Huỳnh Văn E",
-      email: "huynhvane@email.com",
-      phone: "0934567890",
-      properties: 6,
-      tenants: 18,
-      monthlyRevenue: 28900000,
-      status: "ACTIVE",
-      joinDate: "2024-12-10",
-    },
-  ];
-
-  const displayLandlords =
-    landlordFilter === "pending" ? pendingLandlords : activeLandlords;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -100,7 +173,7 @@ export default function AdminDashboard() {
           <div>
             <h3 className="font-medium text-gray-500">Tổng số Chủ trọ</h3>
             <p className="text-3xl font-bold mt-2 text-gray-900">
-              {kpiData.totalLandlords}
+              {loading ? "..." : kpiData.totalLandlords}
             </p>
             <p className="text-sm text-gray-400 mt-1">+5 tuần này</p>
           </div>
@@ -114,11 +187,11 @@ export default function AdminDashboard() {
           <div>
             <h3 className="font-medium text-muted-foreground">Tổng số Khách thuê</h3>
             <p className="text-3xl font-bold mt-2 text-green-600">
-              {kpiData.totalTenants}
+              {loading ? "..." : kpiData.totalTenants}
             </p>
             <p className="text-sm text-muted-foreground/70 mt-1">+18 tuần này</p>
           </div>
-          <div className="p-3 bg-green-50 text-green-600 rounded-lg flex-shrink-0">
+          <div className="p-3 bg-green-50 text-green-600 rounded-lg shrink-0">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -128,11 +201,11 @@ export default function AdminDashboard() {
           <div>
             <h3 className="font-medium text-muted-foreground">Tổng số Khu trọ</h3>
             <p className="text-3xl font-bold mt-2 text-purple-600">
-              {kpiData.totalProperties}
+              {loading ? "..." : kpiData.totalProperties}
             </p>
             <p className="text-sm text-muted-foreground/70 mt-1">+3 tuần này</p>
           </div>
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-lg flex-shrink-0">
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-lg shrink-0">
             <Building className="w-6 h-6" />
           </div>
         </div>
@@ -142,11 +215,11 @@ export default function AdminDashboard() {
           <div>
             <h3 className="font-medium text-muted-foreground">Doanh thu tháng này</h3>
             <p className="text-2xl font-bold mt-2 text-amber-600">
-              {kpiData.platformRevenue.toLocaleString("vi-VN")} đ
+              {loading ? "..." : `${kpiData.platformRevenue.toLocaleString("vi-VN")} đ`}
             </p>
             <p className="text-sm text-muted-foreground/70 mt-1">Tính toán từ hoa hồng</p>
           </div>
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-lg flex-shrink-0">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-lg shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
@@ -190,6 +263,18 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+        {error && (
+          <div className="mx-6 mt-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {actionError && (
+          <div className="mx-6 mt-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {actionError}
+          </div>
+        )}
+
         {/* Landlords Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -214,12 +299,6 @@ export default function AdminDashboard() {
                     <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                       Khu trọ
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
-                      Khách thuê
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
-                      Doanh thu
-                    </th>
                   </>
                 )}
                 <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
@@ -238,46 +317,55 @@ export default function AdminDashboard() {
                       {landlord.email}
                     </td>
                     <td className="px-6 py-4 text-muted-foreground text-sm">
-                      {landlord.phone}
+                      {landlord.phone || "-"}
                     </td>
                     {landlordFilter === "pending" && (
                       <td className="px-6 py-4 text-muted-foreground text-sm">
-                        {"createdDate" in landlord ? landlord.createdDate : "-"}
+                        {new Date(landlord.createdAt).toLocaleDateString("vi-VN")}
                       </td>
                     )}
                     {landlordFilter === "active" && (
                       <>
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">
-                            {landlord.properties}
+                            {landlord.propertiesCount}
                           </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full">
-                            {"tenants" in landlord ? landlord.tenants : 0}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 font-medium text-foreground">
-                          {"monthlyRevenue" in landlord
-                            ? landlord.monthlyRevenue.toLocaleString("vi-VN")
-                            : "0"} đ
                         </td>
                       </>
                     )}
                     <td className="px-6 py-4">
-                      <button className="p-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
+                      {landlordFilter === "pending" ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateLandlordStatus(landlord.id, "ACTIVE")}
+                            disabled={actionLoadingId === landlord.id}
+                            className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-60"
+                          >
+                            Duyệt
+                          </button>
+                          <button
+                            onClick={() => updateLandlordStatus(landlord.id, "REJECTED")}
+                            disabled={actionLoadingId === landlord.id}
+                            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+                          >
+                            Từ chối
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Đang hoạt động</span>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan={landlordFilter === "pending" ? 5 : 8}
+                    colSpan={landlordFilter === "pending" ? 5 : 5}
                     className="px-6 py-12 text-center"
                   >
-                    <p className="text-muted-foreground font-medium">Không có dữ liệu</p>
+                    <p className="text-muted-foreground font-medium">
+                      {loading ? "Đang tải dữ liệu..." : "Không có dữ liệu"}
+                    </p>
                   </td>
                 </tr>
               )}

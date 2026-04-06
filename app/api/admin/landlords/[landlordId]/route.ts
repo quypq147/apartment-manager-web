@@ -2,25 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
+type LandlordStatus = "ACTIVE" | "PENDING_VERIFICATION" | "REJECTED";
+
 interface RouteContext {
   params: Promise<{
     landlordId: string;
   }>;
 }
 
-const STATUS_VALUES = ["ACTIVE", "PENDING_VERIFICATION", "REJECTED"] as const;
-
-function getStatusStore() {
-  const globalWithStore = globalThis as typeof globalThis & {
-    __landlordStatusStore?: Map<string, "ACTIVE" | "PENDING_VERIFICATION" | "REJECTED">;
-  };
-
-  if (!globalWithStore.__landlordStatusStore) {
-    globalWithStore.__landlordStatusStore = new Map();
-  }
-
-  return globalWithStore.__landlordStatusStore;
-}
+const STATUS_VALUES: LandlordStatus[] = ["ACTIVE", "PENDING_VERIFICATION", "REJECTED"];
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
@@ -46,7 +36,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = (await request.json()) as { status?: string };
     const status = body.status;
 
-    if (!status || !STATUS_VALUES.includes(status as (typeof STATUS_VALUES)[number])) {
+    if (!status || !STATUS_VALUES.includes(status as LandlordStatus)) {
       return NextResponse.json(
         { success: false, error: "Invalid status" },
         { status: 400 }
@@ -71,8 +61,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const store = getStatusStore();
-    store.set(landlordId, status as "ACTIVE" | "PENDING_VERIFICATION" | "REJECTED");
+    await prisma.user.update({
+      where: { id: landlordId },
+      data: {
+        landlordApprovalStatus: status as LandlordStatus,
+      },
+    });
 
     return NextResponse.json(
       {

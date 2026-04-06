@@ -10,6 +10,7 @@ export default function AdminSettingsPage() {
         "Quản lý quy trình phê duyệt tài khoản chủ trọ.",
         "Theo dõi các chỉ số vận hành và chính sách toàn hệ thống.",
       ]}
+      enableSystemSettings
     />
   );
 }
