@@ -164,6 +164,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (items.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "items must contain at least one item" },
+        { status: 400 }
+      );
+    }
+
     const parsedDueDate = dueDate ? new Date(dueDate) : null;
     if (parsedDueDate && Number.isNaN(parsedDueDate.getTime())) {
       return NextResponse.json(

@@ -3,12 +3,14 @@ import prisma from "@/lib/prisma";
 import crypto from "crypto";
 import nodemailer from "nodemailer"; // Or use Resend, SendGrid, etc.
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
     const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
       return NextResponse.json(
         { success: false, error: "Email không hợp lệ" },
         { status: 400 },

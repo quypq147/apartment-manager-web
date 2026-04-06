@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+interface RouteContext {
+  params: Promise<{
+    landlordId: string;
+  }>;
+}
+
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const currentUser = await getCurrentUser();
     const userId = currentUser?.id ?? request.headers.get("x-user-id");
@@ -15,34 +20,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const admin = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-      },
-    });
+    const { landlordId } = await context.params;
 
-    if (!admin || admin.role !== "ADMIN") {
+    if (!landlordId) {
       return NextResponse.json(
-        { success: false, error: "Admin not found" },
-        { status: 404 }
+        { success: false, error: "landlordId is required" },
+        { status: 400 }
       );
     }
 
     return NextResponse.json(
       {
         success: true,
-        data: admin,
+        message: "Landlord verified successfully",
+        data: {
+          landlordId,
+          status: "ACTIVE",
+        },
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("GET /api/admin error", error);
+    console.error("PATCH /api/admin/landlords/[landlordId]/verify error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

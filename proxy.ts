@@ -5,6 +5,22 @@ export function proxy(request: NextRequest) {
   const userRole = request.cookies.get("user_role");
   const { pathname } = request.nextUrl;
 
+  const redirectToRoleDashboard = () => {
+    if (userRole?.value === "LANDLORD") {
+      return NextResponse.redirect(new URL("/dashboard/owner", request.url));
+    }
+
+    if (userRole?.value === "TENANT") {
+      return NextResponse.redirect(new URL("/dashboard/tenant", request.url));
+    }
+
+    if (userRole?.value === "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard/admin", request.url));
+    }
+
+    return NextResponse.redirect(new URL("/login", request.url));
+  };
+
   // Allow public routes
   if (pathname === "/login" || pathname === "/register" || pathname === "/") {
     return NextResponse.next();
@@ -18,15 +34,15 @@ export function proxy(request: NextRequest) {
 
     // Check role-based access
     if (pathname.startsWith("/dashboard/owner") && userRole.value !== "LANDLORD") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return redirectToRoleDashboard();
     }
 
     if (pathname.startsWith("/dashboard/tenant") && userRole.value !== "TENANT") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return redirectToRoleDashboard();
     }
 
     if (pathname.startsWith("/dashboard/admin") && userRole.value !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return redirectToRoleDashboard();
     }
   }
 

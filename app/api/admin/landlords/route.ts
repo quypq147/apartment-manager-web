@@ -15,34 +15,42 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const admin = await prisma.user.findUnique({
-      where: { id: userId },
+    const landlords = await prisma.user.findMany({
+      where: { role: "LANDLORD" },
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
-        role: true,
         createdAt: true,
+        _count: {
+          select: {
+            ownedProperties: true,
+          },
+        },
       },
+      orderBy: [{ createdAt: "desc" }],
     });
 
-    if (!admin || admin.role !== "ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Admin not found" },
-        { status: 404 }
-      );
-    }
+    const data = landlords.map((landlord) => ({
+      id: landlord.id,
+      name: landlord.name,
+      email: landlord.email,
+      phone: landlord.phone,
+      createdAt: landlord.createdAt,
+      propertiesCount: landlord._count.ownedProperties,
+      status: landlord._count.ownedProperties > 0 ? "ACTIVE" : "PENDING_VERIFICATION",
+    }));
 
     return NextResponse.json(
       {
         success: true,
-        data: admin,
+        data,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("GET /api/admin error", error);
+    console.error("GET /api/admin/landlords error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

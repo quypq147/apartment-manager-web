@@ -300,14 +300,6 @@ export default function OwnerDashboard() {
                       <span className="inline-block px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-md mt-1">
                         {invoice.status === "PARTIAL" ? "Đóng thiếu" : "Chưa thanh toán"}
                       </span>
-                      <p className="font-medium text-foreground">{invoice.contract.tenant.name}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.title}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-foreground">{currency.format(remaining)} đ</p>
-                      <span className="inline-block px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-md mt-1">
-                        {invoice.status === "PARTIAL" ? "Đóng thiếu" : "Chưa thanh toán"}
-                      </span>
                     </div>
                   </div>
                 );

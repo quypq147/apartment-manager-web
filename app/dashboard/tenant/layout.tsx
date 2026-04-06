@@ -9,11 +9,11 @@ import {
   BedDouble,
   Wrench,
   Settings, 
-  LogOut,
   Menu
 } from "lucide-react";
 import { NavLink } from "@/components/nav-link";
 import { ChatBot } from "@/components/chat-bot";
+import { LogoutButton } from "@/components/logout-button";
 
 export default function TenantLayout({
   children,
@@ -83,10 +83,7 @@ export default function TenantLayout({
         </nav>
 
         <div className="border-t border-border p-4">
-          <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950/40">
-            <LogOut className="w-5 h-5" />
-            Đăng xuất
-          </Link>
+          <LogoutButton className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:hover:bg-red-950/40" />
         </div>
       </aside>
 
