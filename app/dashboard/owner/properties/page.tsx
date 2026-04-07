@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, MapPin, DoorOpen } from "lucide-react";
+import { Plus, MapPin, DoorOpen, Trash2 } from "lucide-react";
 import {
+  deleteProperty,
   createProperty,
   getProperties,
   type OwnerProperty,
@@ -18,6 +19,7 @@ export default function PropertiesPage() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [showCreateProperty, setShowCreateProperty] = useState(false);
   const [creatingProperty, setCreatingProperty] = useState(false);
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [propertyForm, setPropertyForm] = useState({
     name: "",
     address: "",
@@ -88,6 +90,37 @@ export default function PropertiesPage() {
     setShowCreateProperty(false);
     setActionMessage("Tạo khu trọ thành công");
     setCreatingProperty(false);
+    await loadProperties();
+  };
+
+  const handleDeleteProperty = async (property: OwnerProperty) => {
+    if (property.rooms.length > 0) {
+      setError("Chỉ có thể xóa khu trọ chưa có phòng");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Xóa khu trọ ${property.name}? Hành động này không thể hoàn tác.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingPropertyId(property.id);
+    setError(null);
+    setActionMessage(null);
+
+    const result = await deleteProperty(property.id);
+
+    if (!result.success) {
+      setError(result.error ?? "Không thể xóa khu trọ");
+      setDeletingPropertyId(null);
+      return;
+    }
+
+    setActionMessage("Xóa khu trọ thành công");
+    setDeletingPropertyId(null);
     await loadProperties();
   };
 
@@ -203,6 +236,17 @@ export default function PropertiesPage() {
                 >
                   Quan ly khu tro
                 </Link>
+                {property.rooms.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteProperty(property)}
+                    disabled={deletingPropertyId === property.id}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-60"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {deletingPropertyId === property.id ? "Đang xóa..." : "Xóa"}
+                  </button>
+                )}
               </div>
             </div>
 

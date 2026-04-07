@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Monitor, ShieldCheck, Bell, Settings } from "lucide-react";
 import ThemeToggleWithIcon from "@/components/toggle";
 
@@ -9,6 +9,14 @@ type SettingsPageProps = {
   description: string;
   roleNoteTitle: string;
   roleNotes: string[];
+  enableSystemSettings?: boolean;
+};
+
+type SystemSettingsFormData = {
+  platformCommissionRate: string;
+  supportEmail: string;
+  autoApproveLandlords: boolean;
+  maintenanceMode: boolean;
 };
 
 export function DashboardSettingsPage({
@@ -16,6 +24,7 @@ export function DashboardSettingsPage({
   description,
   roleNoteTitle,
   roleNotes,
+  enableSystemSettings = false,
 }: SettingsPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +34,114 @@ export function DashboardSettingsPage({
     newPassword: "",
     confirmPassword: "",
   });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const [systemSettings, setSystemSettings] = useState<SystemSettingsFormData>({
+    platformCommissionRate: "5",
+    supportEmail: "support@homemanager.vn",
+    autoApproveLandlords: false,
+    maintenanceMode: false,
+  });
+
+  useEffect(() => {
+    if (!enableSystemSettings) {
+      return;
+    }
+
+    const loadSystemSettings = async () => {
+      setSettingsLoading(true);
+      setSettingsError(null);
+
+      try {
+        const response = await fetch("/api/admin/settings");
+        const result = (await response.json()) as {
+          success: boolean;
+          error?: string;
+          data?: {
+            platformCommissionRate: number;
+            supportEmail: string;
+            autoApproveLandlords: boolean;
+            maintenanceMode: boolean;
+          };
+        };
+
+        if (!response.ok || !result.success || !result.data) {
+          throw new Error(result.error || "Không thể tải cài đặt hệ thống");
+        }
+
+        setSystemSettings({
+          platformCommissionRate: String(result.data.platformCommissionRate),
+          supportEmail: result.data.supportEmail,
+          autoApproveLandlords: result.data.autoApproveLandlords,
+          maintenanceMode: result.data.maintenanceMode,
+        });
+      } catch (loadError) {
+        setSettingsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Không thể tải cài đặt hệ thống"
+        );
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+
+    void loadSystemSettings();
+  }, [enableSystemSettings]);
+
+  const handleSaveSystemSettings = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSettingsError(null);
+    setSettingsSuccess(null);
+
+    const commission = Number(systemSettings.platformCommissionRate);
+    if (Number.isNaN(commission) || commission < 0 || commission > 100) {
+      setSettingsError("Tỷ lệ hoa hồng phải nằm trong khoảng 0-100");
+      return;
+    }
+
+    if (!systemSettings.supportEmail.trim()) {
+      setSettingsError("Vui lòng nhập email hỗ trợ");
+      return;
+    }
+
+    setSettingsSaving(true);
+
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platformCommissionRate: commission,
+          supportEmail: systemSettings.supportEmail,
+          autoApproveLandlords: systemSettings.autoApproveLandlords,
+          maintenanceMode: systemSettings.maintenanceMode,
+        }),
+      });
+
+      const result = (await response.json()) as {
+        success: boolean;
+        error?: string;
+        message?: string;
+      };
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Không thể cập nhật cài đặt hệ thống");
+      }
+
+      setSettingsSuccess(result.message || "Cập nhật cài đặt hệ thống thành công");
+    } catch (saveError) {
+      setSettingsError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Không thể cập nhật cài đặt hệ thống"
+      );
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
 
   const handleChangePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -135,6 +252,119 @@ export function DashboardSettingsPage({
           ))}
         </ul>
       </section>
+
+      {enableSystemSettings && (
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300">
+              <Settings className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-card-foreground">
+                Cài đặt hệ thống
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Cập nhật thông tin vận hành chung cho toàn nền tảng.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveSystemSettings} className="space-y-4">
+            {settingsError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {settingsError}
+              </div>
+            )}
+
+            {settingsSuccess && (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                {settingsSuccess}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  Tỷ lệ hoa hồng nền tảng (%)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={systemSettings.platformCommissionRate}
+                  onChange={(event) =>
+                    setSystemSettings((prev) => ({
+                      ...prev,
+                      platformCommissionRate: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-blue-600"
+                  disabled={settingsLoading || settingsSaving}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  Email hỗ trợ
+                </label>
+                <input
+                  type="email"
+                  value={systemSettings.supportEmail}
+                  onChange={(event) =>
+                    setSystemSettings((prev) => ({
+                      ...prev,
+                      supportEmail: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-blue-600"
+                  disabled={settingsLoading || settingsSaving}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={systemSettings.autoApproveLandlords}
+                  onChange={(event) =>
+                    setSystemSettings((prev) => ({
+                      ...prev,
+                      autoApproveLandlords: event.target.checked,
+                    }))
+                  }
+                  disabled={settingsLoading || settingsSaving}
+                />
+                Tự động duyệt chủ trọ mới đăng ký
+              </label>
+
+              <label className="flex items-center gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={systemSettings.maintenanceMode}
+                  onChange={(event) =>
+                    setSystemSettings((prev) => ({
+                      ...prev,
+                      maintenanceMode: event.target.checked,
+                    }))
+                  }
+                  disabled={settingsLoading || settingsSaving}
+                />
+                Bật chế độ bảo trì hệ thống
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={settingsLoading || settingsSaving}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {settingsSaving ? "Đang lưu..." : "Cập nhật cài đặt hệ thống"}
+            </button>
+          </form>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="mb-2 flex items-center gap-3">

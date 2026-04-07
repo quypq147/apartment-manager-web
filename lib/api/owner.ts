@@ -242,6 +242,16 @@ export function createProperty(
   });
 }
 
+export function deleteProperty(
+  propertyId: string,
+  userId?: string
+): Promise<ApiResult<unknown>> {
+  return apiRequest<unknown>(`/api/properties/${propertyId}`, {
+    method: "DELETE",
+    userId,
+  });
+}
+
 export function createRoom(
   propertyId: string,
   payload: CreateRoomPayload,

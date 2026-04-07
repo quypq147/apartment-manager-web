@@ -49,6 +49,12 @@ enum InvoiceItemType {
   OTHER
 }
 
+enum LandlordApprovalStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  REJECTED
+}
+
 // ---------------------------------------------------------------------------
 // MODELS (Các bảng dữ liệu)
 // ---------------------------------------------------------------------------
@@ -61,14 +67,30 @@ model User {
   phone     String?  @unique
   cccd      String?  @unique 
   role      Role     @default(TENANT)
+  landlordApprovalStatus LandlordApprovalStatus?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   ownedProperties Property[] @relation("LandlordProperties")
   contracts       Contract[] @relation("TenantContracts")
+  updatedAdminSystemSettings AdminSystemSetting[] @relation("AdminSystemSettingUpdatedBy")
   resetPasswordToken String?   @unique
   resetPasswordExpires DateTime?
+}
+
+model AdminSystemSetting {
+  id                     Int     @id @default(1)
+  platformCommissionRate Float   @default(5)
+  autoApproveLandlords   Boolean @default(false)
+  maintenanceMode        Boolean @default(false)
+  supportEmail           String  @default("support@homemanager.vn")
+
+  updatedBy   String?
+  updatedByUser User? @relation("AdminSystemSettingUpdatedBy", fields: [updatedBy], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Property {

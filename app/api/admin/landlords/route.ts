@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
+type LandlordStatus = "ACTIVE" | "PENDING_VERIFICATION" | "REJECTED";
+
+const STATUS_VALUES: LandlordStatus[] = [
+  "ACTIVE",
+  "PENDING_VERIFICATION",
+  "REJECTED",
+];
+
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
@@ -15,6 +23,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const statusParam = request.nextUrl.searchParams.get("status");
+
+    if (statusParam && !STATUS_VALUES.includes(statusParam as LandlordStatus)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid status" },
+        { status: 400 }
+      );
+    }
+
     const landlords = await prisma.user.findMany({
       where: { role: "LANDLORD" },
       select: {
@@ -23,6 +40,7 @@ export async function GET(request: NextRequest) {
         email: true,
         phone: true,
         createdAt: true,
+        landlordApprovalStatus: true,
         _count: {
           select: {
             ownedProperties: true,
@@ -32,20 +50,32 @@ export async function GET(request: NextRequest) {
       orderBy: [{ createdAt: "desc" }],
     });
 
-    const data = landlords.map((landlord) => ({
-      id: landlord.id,
-      name: landlord.name,
-      email: landlord.email,
-      phone: landlord.phone,
-      createdAt: landlord.createdAt,
-      propertiesCount: landlord._count.ownedProperties,
-      status: landlord._count.ownedProperties > 0 ? "ACTIVE" : "PENDING_VERIFICATION",
-    }));
+    const data = landlords.map((landlord) => {
+      const status =
+        (landlord.landlordApprovalStatus as LandlordStatus | null) ??
+        (landlord._count.ownedProperties > 0
+          ? "ACTIVE"
+          : "PENDING_VERIFICATION");
+
+      return {
+        id: landlord.id,
+        name: landlord.name,
+        email: landlord.email,
+        phone: landlord.phone,
+        createdAt: landlord.createdAt,
+        propertiesCount: landlord._count.ownedProperties,
+        status,
+      };
+    });
+
+    const filteredData = statusParam
+      ? data.filter((landlord) => landlord.status === statusParam)
+      : data;
 
     return NextResponse.json(
       {
         success: true,
-        data,
+        data: filteredData,
       },
       { status: 200 }
     );
