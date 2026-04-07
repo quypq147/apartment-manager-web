@@ -19,7 +19,7 @@ test.describe('API regression', () => {
     expect(res.status()).toBe(401);
   });
 
-  test('owner APIs', async ({ page, request, loginAsOwner }) => {
+  test('APIs chủ nhà', async ({ page, request, loginAsOwner }) => {
     await loginAsOwner();
     const session = getSession(await page.context().cookies());
 
@@ -53,7 +53,7 @@ test.describe('API regression', () => {
     expect(tenantsRes.status()).toBe(200);
   });
 
-  test('tenant APIs', async ({ page, request, loginAsTenant }) => {
+  test('APIs người thuê', async ({ page, request, loginAsTenant }) => {
     await loginAsTenant();
     const session = getSession(await page.context().cookies());
 
@@ -88,7 +88,7 @@ test.describe('API regression', () => {
     expect(chatGetRes.status()).toBe(200);
   });
 
-  test('admin APIs', async ({ page, request, loginAsAdmin }) => {
+  test('APIs admin', async ({ page, request, loginAsAdmin }) => {
     await loginAsAdmin();
     const session = getSession(await page.context().cookies());
 
